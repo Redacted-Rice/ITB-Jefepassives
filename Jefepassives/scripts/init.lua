@@ -14,6 +14,7 @@ local mod = {
 
 function mod:init()
 	self.libs.passiveEffect = require(self.scriptPath .. "libs/passiveEffect")
+	self.libs.boardUtils = require(self.scriptPath .. "libs/boardUtils")
 	require(self.scriptPath .. "libs/boardEvents")
 
 	require(self.scriptPath .. "images")
@@ -23,12 +24,14 @@ function mod:init()
 	require(self.scriptPath .. "weapons/passive_deploy_items")
 	require(self.scriptPath .. "weapons/passive_random_swap")
 	require(self.scriptPath .. "weapons/passive_rst_decoy")
+	require(self.scriptPath .. "weapons/passive_migration_instincts")
 
 	modApi:addWeaponDrop("Jefepassives_AcidRain_Passive")
 	modApi:addWeaponDrop("Jefepassives_CancelNearbyAttacks_Passive")
 	modApi:addWeaponDrop("jefepassives_DeployItems_Passive")
 	modApi:addWeaponDrop("Jefepassives_RandomSwap_Passive")
 	modApi:addWeaponDrop("Jefepassives_RstDecoy")
+	modApi:addWeaponDrop("Jefepassives_MigrationInstincts")
 end
 
 function mod:load(options, version)

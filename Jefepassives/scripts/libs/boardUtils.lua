@@ -358,6 +358,54 @@ if isNewestVersion then
 		end
 	end
 
+	function BoardUtils.isSafeSpawnTile(point, pathing)
+		if not Board:IsValid(point) then
+			return false
+		end
+		if Board:IsPawnSpace(point) then
+			return false
+		end
+		if pathing and Board:IsBlocked(point, pathing) then
+			return false
+		end
+		-- Some of these may be redundant
+		if not Board:IsSafe(point) then
+			return false
+		end
+		if Board:IsDangerous(point) then
+			return false
+		end
+		if Board:IsDangerousItem(point) then
+			return false
+		end
+		if Board:IsSpawning(point) then
+			return false
+		end
+		if Board:IsEnvironmentDanger(point) then
+			return false
+		end
+		if Board:IsAcid(point) then
+			return false
+		end
+		return true
+	end
+
+	function BoardUtils.getSafeSpawnTiles(pathing)
+		local candidates = {}
+		local boardSize = Board:GetSize()
+
+		for x = 0, boardSize.x - 1 do
+			for y = 0, boardSize.y - 1 do
+				local point = Point(x, y)
+				if BoardUtils.isSafeSpawnTile(point, pathing) then
+					table.insert(candidates, point)
+				end
+			end
+		end
+
+		return candidates
+	end
+
 	function BoardUtils:init()
 		-- Initialize event subscriptions
 		modapiext.events.onPawnUndoMove:subscribe(function(mission, pawn, undonePosition)

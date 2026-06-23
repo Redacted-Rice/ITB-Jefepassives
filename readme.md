@@ -27,4 +27,4 @@ Place the `Jefepassives` folder in `Into the Breach/mods/`. When you open the fo
 | Mines Dispenser | Truelch | `jefepassives_DeployItems_Passive` | At the start mission deploy 3 "Items" on random empty tiles.<br>These "Items" are Repair Platforms, but can also be Mines with upgrades. |
 | Migration Instincts | Das Keifer | `Jefepassives_MigrationInstincts_Passive` | At the start of the Vek turn, each Vek attempts to move one tile to the right. |
 | Experimental Swapper | Truelch | `Jefepassives_RandomSwap_Passive` | At the start of player's turn, swap two random enemies. |
-| RST Decoy | Das Keifer | `Jefepassives_RstDecoy_Passive` | At mission start, replaces a building with a decoy structure. |
+| RST Decoy | Das Keifer | `Jefepassives_RstDecoy_Passive` | At mission start setups a decoy on a random tile. |

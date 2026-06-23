@@ -14,11 +14,15 @@ local mod = {
 
 function mod:init()
 	self.libs.passiveEffect = require(self.scriptPath .. "libs/passiveEffect")
+	self.libs.armorDetection = require(self.scriptPath .. "libs/armorDetection")
 
 	require(self.scriptPath .. "images")
 	require(self.scriptPath .. "weapons/passive_rst_decoy")
+	require(self.scriptPath .. "weapons/passive_lonely_awkward")
 
 	modApi:addWeaponDrop("Jefepassives_RstDecoy")
+	modApi:addWeaponDrop("Jefepassives_Loneliness_Passive")
+	modApi:addWeaponDrop("Jefepassives_Awkwardness_Passive")
 end
 
 function mod:load(options, version)

@@ -1,6 +1,6 @@
 -- Vek migrate to the right at the start of the enemy turn.
 local MIGRATION_DIRECTION = VEC_RIGHT
-local DUCK_FLYOVER_IMAGE = "effects/migration_duck_flyover.png"
+local DUCK_FLYOVER_IMAGE = "effects/flying_duck.png"
 local DUCK_FLYOVER_STAGGER = 0.12
 
 local boardUtils = mod_loader.mods[modApi.currentMod].libs.boardUtils

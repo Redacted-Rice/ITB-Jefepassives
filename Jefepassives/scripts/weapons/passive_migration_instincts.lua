@@ -101,6 +101,12 @@ function Jefepassives_MigrationInstincts_Passive:getMigrationDestination(pawn, d
 	return best
 end
 
+function Jefepassives_MigrationInstincts_Passive:appendDuckAirstrike(effect, space)
+	effect:AddAirstrike(space, DUCK_FLYOVER_IMAGE)
+	local tbl = extract_table(effect.effect)
+	tbl[#tbl].fDelay = 0
+end
+
 function Jefepassives_MigrationInstincts_Passive:getCenterColumns(boardSize)
 	local startX = math.max(0, math.floor(boardSize.x / 2) - 2)
 	local columns = {}
@@ -112,6 +118,10 @@ function Jefepassives_MigrationInstincts_Passive:getCenterColumns(boardSize)
 	return columns
 end
 
+-- TODO: Make a bit more varaible
+-- Tie min and max size to upgrade
+-- move center duck a bit more randomly (anyu of the center 4)?
+-- allow for more unbalanced formations
 function Jefepassives_MigrationInstincts_Passive:buildDuckFlyoverFormation()
 	local boardSize = Board:GetSize()
 	local columns = self:getCenterColumns(boardSize)
@@ -120,7 +130,7 @@ function Jefepassives_MigrationInstincts_Passive:buildDuckFlyoverFormation()
 	local lead = Point(leadColumn, leadRow)
 	local perpendicular = Point(-MIGRATION_DIRECTION.y, MIGRATION_DIRECTION.x)
 	local duckCount = math.random(3, 8)
-	local formation = {{space = lead, stagger = 0}}
+	local formation = {{space = lead, stage = 0}}
 
 	local depth = 1
 	while #formation < duckCount do
@@ -134,7 +144,7 @@ function Jefepassives_MigrationInstincts_Passive:buildDuckFlyoverFormation()
 			if Board:IsValid(space) then
 				table.insert(formation, {
 					space = space,
-					stagger = depth * DUCK_FLYOVER_STAGGER,
+					stage = depth,
 				})
 			end
 		end
@@ -144,17 +154,17 @@ function Jefepassives_MigrationInstincts_Passive:buildDuckFlyoverFormation()
 	return formation
 end
 
--- TODO: this isn't working right ATM. Images are invisible but I think its also doing them in serial since there is a long delay
 function Jefepassives_MigrationInstincts_Passive:addDuckFlyover(effect)
 	-- TODO: Airstrike sound effect will likely be comical - need to decide if it fits enough or a different one to use
 	effect:AddSound("/props/airstrike")
 	local formation = self:buildDuckFlyoverFormation()
+	local lastDepth = 0
 	for index, duck in ipairs(formation) do
-		if index > 1 then
-			effect:AddDelay(duck.stagger)
+		if lastDepth ~= duck.stage then
+			lastDepth = duck.stage
+			effect:AddDelay(DUCK_FLYOVER_STAGGER)
 		end
-		-- TODO: Make sure I can do this with a delay or try to modify it out
-		effect:AddAirstrike(duck.space, DUCK_FLYOVER_IMAGE)
+		Jefepassives_MigrationInstincts_Passive:appendDuckAirstrike(effect, duck.space)
 	end
 
 	-- TODO: Determine delay

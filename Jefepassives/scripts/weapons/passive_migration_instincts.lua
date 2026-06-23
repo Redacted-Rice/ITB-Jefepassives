@@ -5,7 +5,7 @@ local DUCK_FLYOVER_STAGGER = 0.12
 
 local boardUtils = mod_loader.mods[modApi.currentMod].libs.boardUtils
 
-Jefepassives_MigrationInstincts = PassiveSkill:new{
+Jefepassives_MigrationInstincts_Passive = PassiveSkill:new{
 	Name = "Migration Instincts",
 	Description = "At the start of the Vek turn, each Vek attempts to move one tile to the right.",
 	Icon = "weapons/passives/passive_migration_instincts.png",
@@ -15,23 +15,26 @@ Jefepassives_MigrationInstincts = PassiveSkill:new{
 	Upgrades = 1,
 	UpgradeCost = {1},
 	ExtendedMigration = false,
+	Passive = "Jefepassives_MigrationInstincts_Passive",
 	TipImage = {
-		Unit = Point(2, 2),
+		Unit = Point(2, 3),
 		CustomEnemy = "Scorpion1",
 		Enemy = Point(1, 2),
 	},
 }
 
 local passiveEffect = mod_loader.mods[modApi.currentMod].libs.passiveEffect
-Jefepassives_MigrationInstincts.passiveEffect = passiveEffect
+Jefepassives_MigrationInstincts_Passive.passiveEffect = passiveEffect
 
-Weapon_Texts.Jefepassives_MigrationInstincts_Upgrade1 = "Stampede"
-Jefepassives_MigrationInstincts_A = Jefepassives_MigrationInstincts:new{
+Weapon_Texts.Jefepassives_MigrationInstincts_Passive_Upgrade1 = "Stampede"
+Jefepassives_MigrationInstincts_Passive_A = Jefepassives_MigrationInstincts_Passive:new{
 	UpgradeDescription = "Vek move up to half their move speed (rounded down, minimum 1) instead.",
 	ExtendedMigration = true,
+	Passive = "Jefepassives_MigrationInstincts_Passive_A",
 }
 
-function Jefepassives_MigrationInstincts:GetSkillEffect(p1, p2)
+-- Preview only
+function Jefepassives_MigrationInstincts_Passive:GetSkillEffect(p1, p2)
 	local ret = SkillEffect()
 	local from = self.TipImage.Enemy
 	local stepCount = self.ExtendedMigration and 2 or 1
@@ -49,12 +52,12 @@ function Jefepassives_MigrationInstincts:GetSkillEffect(p1, p2)
 	return ret
 end
 
-function Jefepassives_MigrationInstincts:getReachableMigrationSpaces(pawn, maxSteps)
+function Jefepassives_MigrationInstincts_Passive:getReachableMigrationSpaces(pawn, maxSteps)
 	local start = pawn:GetSpace()
 	return extract_table(Board:GetReachable(start, maxSteps, pawn:GetPathProf()))
 end
 
-function Jefepassives_MigrationInstincts:getMigrationSpeed(pawn)
+function Jefepassives_MigrationInstincts_Passive:getMigrationSpeed(pawn)
 	local pawnSpeed = pawn:GetMoveSpeed()
 	if pawnSpeed == 0 then
 		return 0
@@ -65,7 +68,7 @@ function Jefepassives_MigrationInstincts:getMigrationSpeed(pawn)
 	return math.max(1, math.floor(pawnSpeed / 2))
 end
 
-function Jefepassives_MigrationInstincts:scoreMigrationDestination(start, point, direction)
+function Jefepassives_MigrationInstincts_Passive:scoreMigrationDestination(start, point, direction)
 	local delta = point - start
 	local progress = delta.x * direction.x + delta.y * direction.y
 
@@ -77,7 +80,7 @@ function Jefepassives_MigrationInstincts:scoreMigrationDestination(start, point,
 	return progress * 1000 - perpendicular
 end
 
-function Jefepassives_MigrationInstincts:getMigrationDestination(pawn, direction, maxSteps, reserved)
+function Jefepassives_MigrationInstincts_Passive:getMigrationDestination(pawn, direction, maxSteps, reserved)
 	if maxSteps <= 0 then
 		return nil
 	end
@@ -98,7 +101,7 @@ function Jefepassives_MigrationInstincts:getMigrationDestination(pawn, direction
 	return best
 end
 
-function Jefepassives_MigrationInstincts:getCenterColumns(boardSize)
+function Jefepassives_MigrationInstincts_Passive:getCenterColumns(boardSize)
 	local startX = math.max(0, math.floor(boardSize.x / 2) - 2)
 	local columns = {}
 	for x = startX, startX + 3 do
@@ -109,7 +112,7 @@ function Jefepassives_MigrationInstincts:getCenterColumns(boardSize)
 	return columns
 end
 
-function Jefepassives_MigrationInstincts:buildDuckFlyoverFormation()
+function Jefepassives_MigrationInstincts_Passive:buildDuckFlyoverFormation()
 	local boardSize = Board:GetSize()
 	local columns = self:getCenterColumns(boardSize)
 	local leadColumn = columns[math.random(1, #columns)]
@@ -141,21 +144,24 @@ function Jefepassives_MigrationInstincts:buildDuckFlyoverFormation()
 	return formation
 end
 
-function Jefepassives_MigrationInstincts:addDuckFlyover(effect)
-	-- Airstrike sound effect will likely be comical - need to decide if it fits enough or a different one to use
+-- TODO: this isn't working right ATM. Images are invisible but I think its also doing them in serial since there is a long delay
+function Jefepassives_MigrationInstincts_Passive:addDuckFlyover(effect)
+	-- TODO: Airstrike sound effect will likely be comical - need to decide if it fits enough or a different one to use
 	effect:AddSound("/props/airstrike")
 	local formation = self:buildDuckFlyoverFormation()
 	for index, duck in ipairs(formation) do
 		if index > 1 then
 			effect:AddDelay(duck.stagger)
 		end
+		-- TODO: Make sure I can do this with a delay or try to modify it out
 		effect:AddAirstrike(duck.space, DUCK_FLYOVER_IMAGE)
 	end
 
+	-- TODO: Determine delay
 	effect:AddDelay(0.35)
 end
 
-function Jefepassives_MigrationInstincts:addMigrationMoves(effect)
+function Jefepassives_MigrationInstincts_Passive:addMigrationMoves(effect)
 	local reserved = {}
 	local moves = {}
 
@@ -163,19 +169,13 @@ function Jefepassives_MigrationInstincts:addMigrationMoves(effect)
 		local pawn = Board:GetPawn(pawnId)
 		if pawn and Board:IsPawnAlive(pawnId) and not pawn:IsDead() then
 			local maxSteps = self:getMigrationSpeed(pawn)
-			local destination = self:getMigrationDestination(
-				pawn,
-				MIGRATION_DIRECTION,
-				maxSteps,
-				reserved
-			)
+			local destination = self:getMigrationDestination(pawn,
+					MIGRATION_DIRECTION, maxSteps, reserved)
 
 			if destination then
 				reserved[boardUtils.getSpaceHash(destination)] = true
-				table.insert(
-					moves,
-					Board:GetPath(pawn:GetSpace(), destination, pawn:GetPathProf())
-				)
+				table.insert(moves, Board:GetPath(
+						pawn:GetSpace(), destination, pawn:GetPathProf()))
 			end
 		end
 	end
@@ -188,25 +188,21 @@ function Jefepassives_MigrationInstincts:addMigrationMoves(effect)
 	return #moves > 0
 end
 
-function Jefepassives_MigrationInstincts:migrateEnemies()
-	if not Board or Game:GetTeamTurn() ~= TEAM_ENEMY then
-		return
-	end
-
+function Jefepassives_MigrationInstincts_Passive:migrateEnemies()
 	local effect = SkillEffect()
 	self:addDuckFlyover(effect)
 	self:addMigrationMoves(effect)
 	Board:AddEffect(effect)
 end
 
-function Jefepassives_MigrationInstincts:GetPassiveSkillEffect_OnNextTurn(mission, pawnTeam)
-	if pawnTeam ~= TEAM_ENEMY then
+function Jefepassives_MigrationInstincts_Passive:GetPassiveSkillEffect_OnNextTurn(mission)
+	if Game:GetTeamTurn() ~= TEAM_ENEMY then
 		return
 	end
 	self:migrateEnemies()
 end
 
 passiveEffect:addPassiveEffect(
-	"Jefepassives_MigrationInstincts",
+	"Jefepassives_MigrationInstincts_Passive",
 	{"onNextTurn"}
 )

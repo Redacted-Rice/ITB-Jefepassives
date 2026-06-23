@@ -55,7 +55,7 @@ Jefepassives_RstDecoy_Pawn_Reinforced = Pawn:new{
 }
 AddPawn("Jefepassives_RstDecoy_Pawn_Reinforced")
 
-Jefepassives_RstDecoy = PassiveSkill:new{
+Jefepassives_RstDecoy_Passive = PassiveSkill:new{
 	Name = "RST Decoy",
 	Description = "At mission start, replaces a building with a decoy structure.",
 	Icon = "weapons/passives/passive_rst_decoy.png",
@@ -66,28 +66,32 @@ Jefepassives_RstDecoy = PassiveSkill:new{
 	UpgradeCost = {2, 2},
 	DecoyCount = 1,
 	Reinforced = false,
+	Passive = "Jefepassives_RstDecoy_Passive",
 	TipImage = {
 		Unit = Point(2, 2),
 	},
 }
 
 local passiveEffect = mod_loader.mods[modApi.currentMod].libs.passiveEffect
-Jefepassives_RstDecoy.passiveEffect = passiveEffect
+Jefepassives_RstDecoy_Passive.passiveEffect = passiveEffect
 
-Weapon_Texts.Jefepassives_RstDecoy_Upgrade1 = "Reinforced"
-Jefepassives_RstDecoy_A = Jefepassives_RstDecoy:new{
+Weapon_Texts.Jefepassives_RstDecoy_Passive_Upgrade1 = "Reinforced"
+Jefepassives_RstDecoy_Passive_A = Jefepassives_RstDecoy_Passive:new{
 	UpgradeDescription = "Decoys have +3 Health.",
 	Reinforced = true,
+	Passive = "Jefepassives_RstDecoy_Passive_A",
 }
 
-Weapon_Texts.Jefepassives_RstDecoy_Upgrade2 = "Mass Produce"
-Jefepassives_RstDecoy_B = Jefepassives_RstDecoy:new{
+Weapon_Texts.Jefepassives_RstDecoy_Passive_Upgrade2 = "Mass Produce"
+Jefepassives_RstDecoy_Passive_B = Jefepassives_RstDecoy_Passive:new{
 	UpgradeDescription = "Places an additional decoy.",
 	DecoyCount = 2,
+	Passive = "Jefepassives_RstDecoy_Passive_B",
 }
 
-Jefepassives_RstDecoy_AB = Jefepassives_RstDecoy_A:new{
+Jefepassives_RstDecoy_Passive_AB = Jefepassives_RstDecoy_Passive_A:new{
 	DecoyCount = 2,
+	Passive = "Jefepassives_RstDecoy_Passive_AB",
 }
 
 local DECOY_PAWN_TYPES = {
@@ -95,14 +99,14 @@ local DECOY_PAWN_TYPES = {
 	"Jefepassives_RstDecoy_Pawn_Reinforced",
 }
 
-function Jefepassives_RstDecoy:getDecoyPawnType()
+function Jefepassives_RstDecoy_Passive:getDecoyPawnType()
 	if self.Reinforced then
 		return "Jefepassives_RstDecoy_Pawn_Reinforced"
 	end
 	return "Jefepassives_RstDecoy_Pawn"
 end
 
-function Jefepassives_RstDecoy:GetPassiveSkillEffect_MissionStartHook(mission)
+function Jefepassives_RstDecoy_Passive:GetPassiveSkillEffect_MissionStartHook(mission)
 	local choices = mission:GetReplaceableBuildings()
 	
 	LOG("Decoy count" .. self.DecoyCount)
@@ -114,7 +118,7 @@ function Jefepassives_RstDecoy:GetPassiveSkillEffect_MissionStartHook(mission)
 end
 
 passiveEffect:addPassiveEffect(
-	"Jefepassives_RstDecoy",
+	"Jefepassives_RstDecoy_Passive",
 	{
 		"missionStartHook",
 	}

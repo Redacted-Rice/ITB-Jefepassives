@@ -20,5 +20,11 @@ Place the `Jefepassives` folder in `Into the Breach/mods/`. When you open the fo
 
 ## Passives
 
-* RST Decoy - After deployment, sets up a decoy structure on a random, open tile.
-* Migration Instincts (1 core) - At the start of the Vek turn, each Vek moves right if able. Upgrade: move up to half move speed (min 1), including diagonals.
+| Name | Author | Weapon ID | Description |
+|------|--------|-----------|-------------|
+| A.C.I.D. Rain | Truelch | `Jefepassives_AcidRain_Passive` | At the start of every turn, create an A.C.I.D. pool randomly on the map. |
+| Intimidating presence | Truelch | `Jefepassives_CancelNearbyAttacks_Passive` | At the end of player's turn, Mechs cancel attacks of nearby enemies with fewer HP. |
+| Mines Dispenser | Truelch | `jefepassives_DeployItems_Passive` | At the start mission deploy 3 "Items" on random empty tiles.<br>These "Items" are Repair Platforms, but can also be Mines with upgrades. |
+| Migration Instincts | Das Keifer | `Jefepassives_MigrationInstincts_Passive` | At the start of the Vek turn, each Vek attempts to move one tile to the right. |
+| Experimental Swapper | Truelch | `Jefepassives_RandomSwap_Passive` | At the start of player's turn, swap two random enemies. |
+| RST Decoy | Das Keifer | `Jefepassives_RstDecoy_Passive` | At mission start, replaces a building with a decoy structure. |

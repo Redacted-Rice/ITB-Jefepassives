@@ -18,8 +18,6 @@ Jefepassives_MigrationInstincts_Passive = PassiveSkill:new{
 	ExtendedMigration = false,
 	minDucks = 3,
 	maxDucks = 6,
-	-- TODO: Not needed I think?
-	Passive = "Jefepassives_MigrationInstincts_Passive",
 	TipImage = {
 		Unit = Point(2, 3),
 		CustomEnemy = "Scorpion1",
@@ -36,7 +34,6 @@ Jefepassives_MigrationInstincts_Passive_A = Jefepassives_MigrationInstincts_Pass
 	ExtendedMigration = true,
 	minDucks = 4,
 	maxDucks = 8,
-	Passive = "Jefepassives_MigrationInstincts_Passive_A",
 }
 
 -- Preview only

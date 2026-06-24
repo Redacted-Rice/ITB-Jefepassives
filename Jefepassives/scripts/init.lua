@@ -34,8 +34,4 @@ function mod:init()
 	modApi:addWeaponDrop("Jefepassives_RstDecoy_Passive")
 end
 
-function mod:load(options, version)
-	self.libs.passiveEffect:load()
-end
-
 return mod

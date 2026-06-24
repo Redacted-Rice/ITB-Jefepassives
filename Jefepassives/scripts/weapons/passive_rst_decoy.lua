@@ -68,7 +68,6 @@ Jefepassives_RstDecoy_Passive = PassiveSkill:new{
 	UpgradeCost = {2, 2},
 	DecoyCount = 1,
 	Reinforced = false,
-	Passive = "Jefepassives_RstDecoy_Passive",
 	TipImage = {
 		Unit = Point(2, 2),
 	},
@@ -87,19 +86,16 @@ Weapon_Texts.Jefepassives_RstDecoy_Passive_Upgrade1 = "Reinforced"
 Jefepassives_RstDecoy_Passive_A = Jefepassives_RstDecoy_Passive:new{
 	UpgradeDescription = "Decoys have +3 Health.",
 	Reinforced = true,
-	Passive = "Jefepassives_RstDecoy_Passive_A",
 }
 
 Weapon_Texts.Jefepassives_RstDecoy_Passive_Upgrade2 = "Mass Produce"
 Jefepassives_RstDecoy_Passive_B = Jefepassives_RstDecoy_Passive:new{
 	UpgradeDescription = "Places an additional decoy.",
 	DecoyCount = 2,
-	Passive = "Jefepassives_RstDecoy_Passive_B",
 }
 
 Jefepassives_RstDecoy_Passive_AB = Jefepassives_RstDecoy_Passive_A:new{
 	DecoyCount = 2,
-	Passive = "Jefepassives_RstDecoy_Passive_AB",
 }
 
 function Jefepassives_RstDecoy_Passive:getDecoyPawnType()

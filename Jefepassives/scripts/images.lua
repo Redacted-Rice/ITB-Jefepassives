@@ -12,3 +12,5 @@ modApi:appendAsset("img/weapons/passives/passive_rst_decoy.png",            reso
 
 modApi:appendAsset("img/units/passive/fake_building_a.png", resourcePath .."img/units/passive/fake_building_a.png")
 modApi:appendAsset("img/units/passive/fake_building_standing.png", resourcePath .."img/units/passive/fake_building_standing.png")
+modApi:appendAsset("img/units/passive/fake_building2_a.png", resourcePath .."img/units/passive/fake_building2_a.png")
+modApi:appendAsset("img/units/passive/fake_building2_standing.png", resourcePath .."img/units/passive/fake_building2_standing.png")

@@ -9,8 +9,9 @@ a.jp_rst_decoy = a.BaseUnit:new{
 	PosX = -28,
 	PosY = -10,
 }
-
--- TODO: Consider massive or not and if we can do water images and a water death
+a.jp_rst_decoy2 = a.jp_rst_decoy:new{
+	Image = "units/passive/fake_building2_standing.png",
+}
 
 local DAT = 0.09
 local SAT = DAT * 4
@@ -23,6 +24,9 @@ a.jp_rst_decoyd = a.jp_rst_decoy:new{
 		SAT, DAT, DAT, DAT, DAT, DAT, DAT, DAT, DAT, DAT, DAT},
 	Loop = false,
 }
+a.jp_rst_decoy2d = a.jp_rst_decoyd:new{
+	Image = "units/passive/fake_building2_a.png",
+}
 
 Jefepassives_RstDecoy_Pawn = Pawn:new{
 	Name = "RST Decoy",
@@ -32,6 +36,7 @@ Jefepassives_RstDecoy_Pawn = Pawn:new{
 	MoveSpeed = 0,
 	SkillList = { },
 	DefaultTeam = TEAM_PLAYER,
+	Pushable = false,
 	IgnoreSmoke = true,
 	IgnoreFlip = true,
 	IsPortrait = false,
@@ -39,16 +44,15 @@ Jefepassives_RstDecoy_Pawn = Pawn:new{
 }
 AddPawn("Jefepassives_RstDecoy_Pawn")
 
--- TODO: Eventually use a different image that is metal instead of wood/cardboard looking
--- TODO: Maybe make these unpushable?
 Jefepassives_RstDecoy_Pawn_Reinforced = Pawn:new{
 	Name = "RST Decoy",
 	Health = 4,
 	Neutral = true,
-	Image = "jp_rst_decoy",
+	Image = "jp_rst_decoy2",
 	MoveSpeed = 0,
 	SkillList = { },
 	DefaultTeam = TEAM_PLAYER,
+	Pushable = false,
 	IgnoreSmoke = true,
 	IgnoreFlip = true,
 	IgnoreFire = true,
@@ -62,14 +66,17 @@ Jefepassives_RstDecoy = PassiveSkill:new{
 	Description = "At mission start setups a decoy on a random tile.",
 	Icon = "weapons/passives/passive_rst_decoy.png",
 	Rarity = 1,
-	PowerCost = 0,
+	PowerCost = 1,
 	Damage = 0,
 	Upgrades = 2,
 	UpgradeCost = {2, 2},
 	DecoyCount = 1,
 	Reinforced = false,
 	TipImage = {
+		CustomPawn = "Jefepassives_RstDecoy_Pawn",
 		Unit = Point(2, 2),
+		Building = Point(2, 1),
+		Enemy = Point(2,3),
 	},
 	DecoyPawnTypes = {
 		Jefepassives_RstDecoy_Pawn = true,
@@ -86,6 +93,12 @@ Weapon_Texts.Jefepassives_RstDecoy_Upgrade1 = "Reinforced"
 Jefepassives_RstDecoy_A = Jefepassives_RstDecoy:new{
 	UpgradeDescription = "Decoys have +3 Health.",
 	Reinforced = true,
+	TipImage = {
+		CustomPawn = "Jefepassives_RstDecoy_Pawn_Reinforced",
+		Unit = Point(2, 2),
+		Building = Point(2, 1),
+		Enemy = Point(2,3),
+	},
 }
 
 Weapon_Texts.Jefepassives_RstDecoy_Upgrade2 = "Mass Produce"
@@ -97,6 +110,17 @@ Jefepassives_RstDecoy_B = Jefepassives_RstDecoy:new{
 Jefepassives_RstDecoy_AB = Jefepassives_RstDecoy_A:new{
 	DecoyCount = 2,
 }
+
+-- only a preview for passive skills
+function Jefepassives_RstDecoy:GetSkillEffect(p1, p2)
+	local ret = SkillEffect()
+	local spaceDamage = SpaceDamage(Point(2, 2), 3)
+	spaceDamage.sAnimation = "SwipeClaw2"
+	spaceDamage.sSound = "/enemy/scorpion_soldier_2/attack"
+	ret:AddMelee(Point(2, 3), spaceDamage)
+	return ret
+end
+
 
 function Jefepassives_RstDecoy:getDecoyPawnType()
 	if self.Reinforced then

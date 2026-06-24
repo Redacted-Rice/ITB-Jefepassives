@@ -19,9 +19,8 @@ Jefepassives_MigratoryInvoker = PassiveSkill:new{
 	minDucks = 4,
 	maxDucks = 6,
 	TipImage = {
-		Unit = Point(2, 3),
-		CustomEnemy = "Scorpion1",
-		Enemy = Point(1, 2),
+		Unit = Point(2, 2),
+		Enemy = Point(1, 1),
 	},
 }
 
@@ -39,6 +38,9 @@ Jefepassives_MigratoryInvoker_A = Jefepassives_MigratoryInvoker:new{
 -- Preview only
 function Jefepassives_MigratoryInvoker:GetSkillEffect(p1, p2)
 	local ret = SkillEffect()
+
+	self:addDuckFlyover(ret)
+
 	local from = self.TipImage.Enemy
 	local stepCount = self.ExtendedMigration and 2 or 1
 
@@ -52,6 +54,7 @@ function Jefepassives_MigratoryInvoker:GetSkillEffect(p1, p2)
 	end
 
 	ret:AddMove(path, FULL_DELAY)
+	ret:AddDelay(3)
 	return ret
 end
 
@@ -111,7 +114,9 @@ function Jefepassives_MigratoryInvoker:appendDuckAirstrike(effect, space)
 end
 
 function Jefepassives_MigratoryInvoker:getNumDucks()
-	return math.random(self.minDucks, self.maxDucks)
+	local min = math.min(Board:GetSize().y, self.minDucks)
+	local max = math.min(Board:GetSize().y, self.maxDucks)
+	return math.random(min, max)
 end
 
 function Jefepassives_MigratoryInvoker:chooseLeadOffset(duckCount)
@@ -191,6 +196,7 @@ function Jefepassives_MigratoryInvoker:addMigrationMoves(effect)
 		local delay = (index == #moves) and FULL_DELAY or NO_DELAY
 		effect:AddMove(path, delay)
 	end
+	effect:AddDelay(1)
 
 	return #moves > 0
 end

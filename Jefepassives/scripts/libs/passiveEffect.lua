@@ -1,11 +1,10 @@
 --[[
 PassiveEffect - Allows for easily creating passive effect for weapons
 
-Author: Das Keifer of Redacted Rice
-Version: 1.3.0
-Discord Server: https://discord.gg/CNjTVrpN4v
+Libs Wiki: https://github.com/Redacted-Rice/ITB-RedactedRiceMods/wiki
 
-See the Treeherder's "Wake the Forest" passive ability for an example of usage
+Author: Das Keifer of Redacted Rice
+Discord Server: https://discord.gg/CNjTVrpN4v
 
 How to Use:
 In the function mod:load(options, version) in init.lua after loading your weapons, load the passive effects:
@@ -35,7 +34,7 @@ When creating a weapon:
 			"preEnvironmentHook"})
  ]]--
 
-local VERSION = "1.4.0"
+local VERSION = "1.5.0"
 
 -- Version check
 local isNewestVersion = false
@@ -150,7 +149,7 @@ if isNewestVersion then
 			-- Check if this is an event or a hook
 			local isEvent = PassiveEffect.isEvent(hook)
 			local isHook = PassiveEffect.isHook(hook)
-			
+
 			if isEvent then
 				-- For events, verify the event exists
 				local event, source = PassiveEffect.findEvent(hook)
@@ -477,9 +476,9 @@ if isNewestVersion then
 		--the active passive effects
 		for hookOrEvent,_ in pairs(PassiveEffect.data.possibleEffects) do
 			if PassiveEffect.DebugLog then LOG("Processing passive effect caller for: "..hookOrEvent) end
-			
+
 			local handlerFn = PassiveEffect.buildPassiveEffectHookFn(hookOrEvent)
-			
+
 			-- Check if this is an event or a hook
 			if PassiveEffect.isEvent(hookOrEvent) then
 				-- Subscribe to event (only once per event)
@@ -499,7 +498,7 @@ if isNewestVersion then
 				-- Add hook using traditional add function
 				local addHook = PassiveEffect.getAddFunctionForHook(hookOrEvent)
 				if PassiveEffect.DebugLog then LOG("Adding hook " .. hookOrEvent .. " via " .. addHook) end
-				
+
 				--supports hooks in both the ModLoader and the ModUtils
 				if modapiext[addHook] then
 					modapiext[addHook](modapiext, handlerFn)
@@ -592,12 +591,27 @@ if isNewestVersion then
 		return allExisting
 	end
 
-	function PassiveEffect:load()
+	function PassiveEffect:finalizeLoad()
 		PassiveEffect:addHooks()
 		PassiveEffect:autoSetWeaponsPassiveFields()
 	end
 else
 	LOG("PassiveEffect: Skipping version " .. VERSION .. " (already have " .. PassiveEffect.version .. ")")
 end
+
+local function onModsLoaded()
+	if VERSION < PassiveEffect.version then
+		return
+	end
+
+	if PassiveEffect.loaded then
+		return
+	end
+
+	PassiveEffect:finalizeLoad()
+	PassiveEffect.loaded = true
+end
+
+modApi:addModsLoadedHook(onModsLoaded)
 
 return PassiveEffect

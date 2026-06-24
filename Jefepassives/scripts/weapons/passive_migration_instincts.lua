@@ -16,7 +16,7 @@ Jefepassives_MigratoryInvoker = PassiveSkill:new{
 	Upgrades = 1,
 	UpgradeCost = {1},
 	ExtendedMigration = false,
-	minDucks = 3,
+	minDucks = 4,
 	maxDucks = 6,
 	TipImage = {
 		Unit = Point(2, 3),
@@ -32,7 +32,7 @@ Weapon_Texts.Jefepassives_MigratoryInvoker_Upgrade1 = "Potency"
 Jefepassives_MigratoryInvoker_A = Jefepassives_MigratoryInvoker:new{
 	UpgradeDescription = "Vek move up to half their move speed (rounded down, minimum 1) instead.",
 	ExtendedMigration = true,
-	minDucks = 4,
+	minDucks = 5,
 	maxDucks = 8,
 }
 
@@ -148,7 +148,9 @@ function Jefepassives_MigratoryInvoker:addDuckFlyover(effect)
 		-- Subtracting VEC_UP moves downward (same as +VEC_DOWN). Add UP to go left on the V.
 		leftSpace = leftSpace + MIGRATION_DIRECTION_LEFT
 		rightSpace = rightSpace - MIGRATION_DIRECTION_LEFT
-		if Board:IsValid(leftSpace) and leadDuckOffset - i > 0 then
+		LOG("leftSpace: " .. leftSpace:GetString() .. " " .. leadDuckOffset - i)
+		LOG("rightSpace: " .. rightSpace:GetString() .. " " .. leadDuckOffset + i)
+		if Board:IsValid(leftSpace) and leadDuckOffset - i >= 0 then
 			self:appendDuckAirstrike(effect, leftSpace)
 		else
 			leftEnded = true
@@ -162,8 +164,8 @@ function Jefepassives_MigratoryInvoker:addDuckFlyover(effect)
 			break
 		end
 	end
-	-- TODO: Determine delay
-	effect:AddDelay(0.35)
+	-- TODO: Maybe have it staggered instead - go row by row with the ducks
+	effect:AddDelay(1)
 end
 
 function Jefepassives_MigratoryInvoker:addMigrationMoves(effect)
@@ -202,8 +204,10 @@ end
 
 function Jefepassives_MigratoryInvoker:GetPassiveSkillEffect_OnNextTurn(mission)
 	if Game:GetTeamTurn() ~= TEAM_ENEMY then
+		LOG("NO MIGRATE " .. Game:GetTeamTurn() .. " -----------")
 		return
 	end
+	LOG("MIGRATING -----------")
 	self:migrateEnemies()
 end
 

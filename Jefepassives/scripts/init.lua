@@ -34,4 +34,7 @@ function mod:init()
 	modApi:addWeaponDrop("Jefepassives_RstDecoy")
 end
 
+function mod:load(options, version)
+end
+
 return mod

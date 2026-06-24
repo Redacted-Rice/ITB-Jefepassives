@@ -57,7 +57,7 @@ Jefepassives_RstDecoy_Pawn_Reinforced = Pawn:new{
 }
 AddPawn("Jefepassives_RstDecoy_Pawn_Reinforced")
 
-Jefepassives_RstDecoy_Passive = PassiveSkill:new{
+Jefepassives_RstDecoy = PassiveSkill:new{
 	Name = "RST Decoy",
 	Description = "At mission start setups a decoy on a random tile.",
 	Icon = "weapons/passives/passive_rst_decoy.png",
@@ -80,32 +80,32 @@ Jefepassives_RstDecoy_Passive = PassiveSkill:new{
 }
 
 local passiveEffect = mod_loader.mods[modApi.currentMod].libs.passiveEffect
-Jefepassives_RstDecoy_Passive.passiveEffect = passiveEffect
+Jefepassives_RstDecoy.passiveEffect = passiveEffect
 
-Weapon_Texts.Jefepassives_RstDecoy_Passive_Upgrade1 = "Reinforced"
-Jefepassives_RstDecoy_Passive_A = Jefepassives_RstDecoy_Passive:new{
+Weapon_Texts.Jefepassives_RstDecoy_Upgrade1 = "Reinforced"
+Jefepassives_RstDecoy_A = Jefepassives_RstDecoy:new{
 	UpgradeDescription = "Decoys have +3 Health.",
 	Reinforced = true,
 }
 
-Weapon_Texts.Jefepassives_RstDecoy_Passive_Upgrade2 = "Mass Produce"
-Jefepassives_RstDecoy_Passive_B = Jefepassives_RstDecoy_Passive:new{
+Weapon_Texts.Jefepassives_RstDecoy_Upgrade2 = "Mass Produce"
+Jefepassives_RstDecoy_B = Jefepassives_RstDecoy:new{
 	UpgradeDescription = "Places an additional decoy.",
 	DecoyCount = 2,
 }
 
-Jefepassives_RstDecoy_Passive_AB = Jefepassives_RstDecoy_Passive_A:new{
+Jefepassives_RstDecoy_AB = Jefepassives_RstDecoy_A:new{
 	DecoyCount = 2,
 }
 
-function Jefepassives_RstDecoy_Passive:getDecoyPawnType()
+function Jefepassives_RstDecoy:getDecoyPawnType()
 	if self.Reinforced then
 		return "Jefepassives_RstDecoy_Pawn_Reinforced"
 	end
 	return "Jefepassives_RstDecoy_Pawn"
 end
 
-function Jefepassives_RstDecoy_Passive:GetPassiveSkillEffect_MissionStartHook(mission)
+function Jefepassives_RstDecoy:GetPassiveSkillEffect_MissionStartHook(mission)
 	local pawnType = self:getDecoyPawnType()
 	-- TODO: Decide on if I want it massive or not and what that means for the pathing
 	local choices = boardUtils.getSafeSpawnTiles(PATH_GROUND)
@@ -126,15 +126,15 @@ function Jefepassives_RstDecoy_Passive:GetPassiveSkillEffect_MissionStartHook(mi
 end
 
 passiveEffect:addPassiveEffect(
-	"Jefepassives_RstDecoy_Passive",
+	"Jefepassives_RstDecoy",
 	{"missionStartHook"}
 )
 
-function Jefepassives_RstDecoy_Passive:isDecoyPawn(pawn)
+function Jefepassives_RstDecoy:isDecoyPawn(pawn)
 	return pawn and self.DecoyPawnTypes[pawn:GetType()]
 end
 
-function Jefepassives_RstDecoy_Passive:tempSetDecoysAsBuildings(changedTiles)
+function Jefepassives_RstDecoy:tempSetDecoysAsBuildings(changedTiles)
 	if not Board then
 		if self.Debug then LOG("Jefepassives RST Decoy: PlanEnvironment changing terrain skipped (no board or mission)") end
 		return 0
@@ -164,7 +164,7 @@ function Jefepassives_RstDecoy_Passive:tempSetDecoysAsBuildings(changedTiles)
 	return count
 end
 
-function Jefepassives_RstDecoy_Passive:restoreDecoyOriginalTerrain(changedTiles)
+function Jefepassives_RstDecoy:restoreDecoyOriginalTerrain(changedTiles)
 	local count = 0
 	for space, terrain in pairs(changedTiles) do
 		if Board and Board:IsValid(space) then
@@ -179,7 +179,7 @@ function Jefepassives_RstDecoy_Passive:restoreDecoyOriginalTerrain(changedTiles)
 	return count
 end
 
-function Jefepassives_RstDecoy_Passive:installPlanEnvironmentWrapper()
+function Jefepassives_RstDecoy:installPlanEnvironmentWrapper()
 	if Mission[self.PlanEnvOriginalKey] then
 		return
 	end
@@ -218,5 +218,5 @@ function Jefepassives_RstDecoy_Passive:installPlanEnvironmentWrapper()
 end
 
 modApi.events.onModsLoaded:subscribe(function()
-	Jefepassives_RstDecoy_Passive:installPlanEnvironmentWrapper()
+	Jefepassives_RstDecoy:installPlanEnvironmentWrapper()
 end)

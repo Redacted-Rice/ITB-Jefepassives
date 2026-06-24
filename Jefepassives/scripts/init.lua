@@ -29,9 +29,9 @@ function mod:init()
 	modApi:addWeaponDrop("Jefepassives_AcidRain_Passive")
 	modApi:addWeaponDrop("Jefepassives_CancelNearbyAttacks_Passive")
 	modApi:addWeaponDrop("jefepassives_DeployItems_Passive")
-	modApi:addWeaponDrop("Jefepassives_MigrationInstincts_Passive")
+	modApi:addWeaponDrop("Jefepassives_MigratoryInvoker")
 	modApi:addWeaponDrop("Jefepassives_RandomSwap_Passive")
-	modApi:addWeaponDrop("Jefepassives_RstDecoy_Passive")
+	modApi:addWeaponDrop("Jefepassives_RstDecoy")
 end
 
 return mod

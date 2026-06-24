@@ -1,5 +1,6 @@
 -- Vek migrate to the right at the start of the enemy turn.
-local MIGRATION_DIRECTION = VEC_RIGHT
+local MIGRATION_DIRECTION = DIR_VECTORS[DIR_RIGHT]
+local MIGRATION_DIRECTION_LEFT = DIR_VECTORS[DIR_UP]
 local DUCK_FLYOVER_IMAGE = "effects/flying_duck.png"
 local DUCK_FLYOVER_STAGGER = 0.12
 
@@ -15,6 +16,9 @@ Jefepassives_MigrationInstincts_Passive = PassiveSkill:new{
 	Upgrades = 1,
 	UpgradeCost = {1},
 	ExtendedMigration = false,
+	minDucks = 3,
+	maxDucks = 6,
+	-- TODO: Not needed I think?
 	Passive = "Jefepassives_MigrationInstincts_Passive",
 	TipImage = {
 		Unit = Point(2, 3),
@@ -30,6 +34,8 @@ Weapon_Texts.Jefepassives_MigrationInstincts_Passive_Upgrade1 = "Stampede"
 Jefepassives_MigrationInstincts_Passive_A = Jefepassives_MigrationInstincts_Passive:new{
 	UpgradeDescription = "Vek move up to half their move speed (rounded down, minimum 1) instead.",
 	ExtendedMigration = true,
+	minDucks = 4,
+	maxDucks = 8,
 	Passive = "Jefepassives_MigrationInstincts_Passive_A",
 }
 
@@ -107,66 +113,58 @@ function Jefepassives_MigrationInstincts_Passive:appendDuckAirstrike(effect, spa
 	tbl[#tbl].fDelay = 0
 end
 
-function Jefepassives_MigrationInstincts_Passive:getCenterColumns(boardSize)
-	local startX = math.max(0, math.floor(boardSize.x / 2) - 2)
-	local columns = {}
-	for x = startX, startX + 3 do
-		if x < boardSize.x then
-			table.insert(columns, x)
-		end
-	end
-	return columns
+function Jefepassives_MigrationInstincts_Passive:getNumDucks()
+	return math.random(self.minDucks, self.maxDucks)
 end
 
--- TODO: Make a bit more varaible
--- Tie min and max size to upgrade
--- move center duck a bit more randomly (anyu of the center 4)?
--- allow for more unbalanced formations
-function Jefepassives_MigrationInstincts_Passive:buildDuckFlyoverFormation()
-	local boardSize = Board:GetSize()
-	local columns = self:getCenterColumns(boardSize)
-	local leadColumn = columns[math.random(1, #columns)]
-	local leadRow = math.floor(boardSize.y / 2)
-	local lead = Point(leadColumn, leadRow)
-	local perpendicular = Point(-MIGRATION_DIRECTION.y, MIGRATION_DIRECTION.x)
-	local duckCount = math.random(3, 8)
-	local formation = {{space = lead, stage = 0}}
+function Jefepassives_MigrationInstincts_Passive:chooseLeadOffset(duckCount)
+	return math.random(1, duckCount - 2)
+end
 
-	local depth = 1
-	while #formation < duckCount do
-		local back = lead - MIGRATION_DIRECTION * depth
-		for side = -1, 1, 2 do
-			if #formation >= duckCount then
-				break
-			end
-
-			local space = back + perpendicular * depth * side
-			if Board:IsValid(space) then
-				table.insert(formation, {
-					space = space,
-					stage = depth,
-				})
-			end
-		end
-		depth = depth + 1
-	end
-
-	return formation
+function Jefepassives_MigrationInstincts_Passive:getFormationOffset(duckCount)
+	local boardSize = Board:GetSize().y
+	-- board size is 8. For 5 this chooses between 0 and 3. for 7 it chooses between 0 and 1.
+	return math.random(0, boardSize - duckCount)
 end
 
 function Jefepassives_MigrationInstincts_Passive:addDuckFlyover(effect)
-	-- TODO: Airstrike sound effect will likely be comical - need to decide if it fits enough or a different one to use
-	effect:AddSound("/props/airstrike")
-	local formation = self:buildDuckFlyoverFormation()
-	local lastDepth = 0
-	for index, duck in ipairs(formation) do
-		if lastDepth ~= duck.stage then
-			lastDepth = duck.stage
-			effect:AddDelay(DUCK_FLYOVER_STAGGER)
-		end
-		Jefepassives_MigrationInstincts_Passive:appendDuckAirstrike(effect, duck.space)
-	end
+	local duckCount = self:getNumDucks()
+	local leadDuckOffset = self:chooseLeadOffset(duckCount)
+	local spaceOffset = self:getFormationOffset(duckCount)
+	local leadSpaceY = spaceOffset + leadDuckOffset
+	local leadSpace = Point(0, leadSpaceY)
 
+	LOG("duckCount: " .. duckCount)
+	LOG("leadSpace: " .. leadSpace:GetString())
+	LOG("leadDuckOffset: " .. leadDuckOffset)
+	LOG("spaceOffset: " .. spaceOffset)
+	LOG("leadSpaceY: " .. leadSpaceY)
+
+	self:appendDuckAirstrike(effect, leadSpace)
+
+	-- duck count is just a convinient max
+	local leftSpace, rightSpace = leadSpace, leadSpace
+	local leftEnded, rightEnded = false, false
+	for i = 1, duckCount do
+		effect:AddDelay(DUCK_FLYOVER_STAGGER)
+
+		-- Subtracting VEC_UP moves downward (same as +VEC_DOWN). Add UP to go left on the V.
+		leftSpace = leftSpace + MIGRATION_DIRECTION_LEFT
+		rightSpace = rightSpace - MIGRATION_DIRECTION_LEFT
+		if Board:IsValid(leftSpace) and leadDuckOffset - i > 0 then
+			self:appendDuckAirstrike(effect, leftSpace)
+		else
+			leftEnded = true
+		end
+		if Board:IsValid(rightSpace) and leadDuckOffset + i < duckCount then
+			self:appendDuckAirstrike(effect, rightSpace)
+		else
+			rightEnded = true
+		end
+		if leftEnded and rightEnded then
+			break
+		end
+	end
 	-- TODO: Determine delay
 	effect:AddDelay(0.35)
 end

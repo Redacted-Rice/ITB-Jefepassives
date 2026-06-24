@@ -13,15 +13,19 @@ a.jp_rst_decoy2 = a.jp_rst_decoy:new{
 	Image = "units/passive/fake_building2_standing.png",
 }
 
-local DAT = 0.09
-local SAT = DAT * 4
+local shutterTime = 0.05
+local pauseTime = 0.25
+local fallTime = 0.09
 a.jp_rst_decoyd = a.jp_rst_decoy:new{
 	Image = "units/passive/fake_building_a.png",
 	PosX = -53,
 	PosY = -10,
-	NumFrames = 11,
+	NumFrames = 13,
 	Lengths = {
-		SAT, DAT, DAT, DAT, DAT, DAT, DAT, DAT, DAT, DAT, DAT},
+		shutterTime, shutterTime, shutterTime, pauseTime,
+		fallTime, fallTime, fallTime, fallTime, fallTime,
+		fallTime, fallTime, fallTime, fallTime,
+	},
 	Loop = false,
 }
 a.jp_rst_decoy2d = a.jp_rst_decoyd:new{

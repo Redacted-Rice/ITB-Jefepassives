@@ -77,7 +77,6 @@ Jefepassives_RstDecoy_Passive = PassiveSkill:new{
 		Jefepassives_RstDecoy_Pawn_Reinforced = true,
 	},
 	PlanEnvOriginalKey = "_jefepassivesRstDecoyPlanEnvOriginal",
-	PlanEnvWrapperInstalledKey = "_jefepassivesRstDecoyPlanEnvWrapped",
 	Debug = true,
 }
 
@@ -115,6 +114,7 @@ function Jefepassives_RstDecoy_Passive:GetPassiveSkillEffect_MissionStartHook(mi
 	-- TODO: Decide on if I want it massive or not and what that means for the pathing
 	local choices = boardUtils.getSafeSpawnTiles(PATH_GROUND)
 	local spawnCount = math.min(self.DecoyCount, #choices)
+	if self.Debug then LOG(string.format("Jefepassives RST Decoy: Spawning %d pawns", spawnCount)) end
 
 	if spawnCount < self.DecoyCount and self.Debug then
 		LOG(string.format("Jefepassives RST Decoy: only %d safe tile(s) available for %d decoy(s)",
@@ -125,6 +125,7 @@ function Jefepassives_RstDecoy_Passive:GetPassiveSkillEffect_MissionStartHook(mi
 		local choice = random_removal(choices)
 		local decoy = PAWN_FACTORY:CreatePawn(pawnType)
 		Board:AddPawn(decoy, choice)
+		if self.Debug then LOG(string.format("Jefepassives RST Decoy: Spawned pawn at %s", choice:GetString())) end
 	end
 end
 
@@ -184,7 +185,7 @@ end
 
 function Jefepassives_RstDecoy_Passive:installPlanEnvironmentWrapper()
 	if Mission[self.PlanEnvOriginalKey] then
-		Returns
+		return
 	end
 	Mission[self.PlanEnvOriginalKey] = Mission.PlanEnvironment
 	local oldPlanEnvironment = Mission[self.PlanEnvOriginalKey]

@@ -83,11 +83,13 @@ function Jefepassives_Awkwardness_Passive:GetSkillEffect(p1,p2)
 end
 
 -- events
-local function applyDamage(mission)
+local function applyDamage(fx)
 	local Awkwardness = IsPassiveSkill("Jefepassives_Awkwardness_Passive")
 	local loneliness = IsPassiveSkill("Jefepassives_Loneliness_Passive")
-	if Game:GetTeamTurn() == TEAM_ENEMY and Board:GetTurn() > 0 and (Awkwardness or loneliness) then
+	if (Game:GetTeamTurn() == TEAM_ENEMY or fx) and Board:GetTurn() > 0 and (Awkwardness or loneliness) then
 		local effect = SkillEffect()
+		local delay = fx and 0.5 or 1
+		-- if fx then delay = 0.5 end
 		local pawnList = extract_table(Board:GetPawns(TEAM_ENEMY))
 		for i = 1, #pawnList do
 			local currPawn = Board:GetPawn(pawnList[i])
@@ -145,14 +147,22 @@ local function applyDamage(mission)
 						Board:SetCracked(pawn:GetSpace(),true)
 					end
 				]])
-				effect:AddDelay(1.0)
+				effect:AddDelay(delay)
 			end
 		end
 		Board:AddEffect(effect)
 	end
 end
 
-modApi.events.onNextTurn:subscribe(applyDamage)
+function onNextTurn(mission)
+	applyDamage(false)
+end
+
+function onPreprocessVekRetreat(mission,fx)
+	applyDamage(fx)
+end
+
+modApi.events.onNextTurn:subscribe(onNextTurn)
+modApi.events.onPreprocessVekRetreat:subscribe(onPreprocessVekRetreat)
 -- modApi.events.onPostEnvironment:subscribe(onPostEnvironment)
--- modApi.events.onPreprocessVekRetreat:subscribe(onPreprocessVekRetreat)
 -- modApi.events.onMissionEnd:subscribe(endMission)

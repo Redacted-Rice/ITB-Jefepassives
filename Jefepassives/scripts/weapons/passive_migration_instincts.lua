@@ -131,7 +131,7 @@ end
 
 function Jefepassives_MigratoryInvoker:addDuckFlyover(effect)
 	effect:AddSound("/props/airstrike")
-	
+
 	local duckCount = self:getNumDucks()
 	local leadDuckOffset = self:chooseLeadOffset(duckCount)
 	local spaceOffset = self:getFormationOffset(duckCount)
@@ -181,25 +181,31 @@ function Jefepassives_MigratoryInvoker:addMigrationMoves(effect)
 
 	for _, pawnId in ipairs(extract_table(Board:GetPawns(TEAM_ENEMY))) do
 		local pawn = Board:GetPawn(pawnId)
-		if pawn and Board:IsPawnAlive(pawnId) and not pawn:IsDead() then
+		if pawn and Board:IsPawnAlive(pawnId) and not pawn:IsDead() and not pawn:IsFrozen() then
 			local maxSteps = self:getMigrationSpeed(pawn)
 			local destination = self:getMigrationDestination(pawn,
 					MIGRATION_DIRECTION, maxSteps, reserved)
 
 			if destination then
 				reserved[boardUtils.getSpaceHash(destination)] = true
-				table.insert(moves, Board:GetPath(
-						pawn:GetSpace(), destination, pawn:GetPathProf()))
+
+				if Pawn:IsTeleporter() then
+					effect:AddTeleport(pawn:GetSpace(), destination, NO_DELAY)
+				else
+					local path = Board:GetPath(pawn:GetSpace(), destination, pawn:GetPathProf())
+					if pawn:IsJumper() then
+						effect:AddLeap(path, NO_DELAY)
+					elseif pawn:IsBurrower() then
+						effect:AddBurrow(path, NO_DELAY)
+					else
+						effect:AddMove(path, NO_DELAY)
+					end
+				end
 			end
 		end
 	end
 
-	for index, path in ipairs(moves) do
-		local delay = (index == #moves) and FULL_DELAY or NO_DELAY
-		effect:AddMove(path, delay)
-	end
-	effect:AddDelay(1)
-
+	effect:AddDelay(1.2)
 	return #moves > 0
 end
 

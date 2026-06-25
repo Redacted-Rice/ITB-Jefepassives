@@ -89,7 +89,6 @@ local function applyDamage(fx)
 	if (Game:GetTeamTurn() == TEAM_ENEMY or fx) and Board:GetTurn() > 0 and (Awkwardness or loneliness) then
 		local effect = SkillEffect()
 		local delay = fx and 0.5 or 1
-		-- if fx then delay = 0.5 end
 		local pawnList = extract_table(Board:GetPawns(TEAM_ENEMY))
 		for i = 1, #pawnList do
 			local currPawn = Board:GetPawn(pawnList[i])

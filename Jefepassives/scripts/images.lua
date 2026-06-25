@@ -11,4 +11,5 @@ modApi:appendAsset("img/weapons/passives/passive_acid_rain.png",            reso
 modApi:appendAsset("img/weapons/passives/passive_rebound.png",            resourcePath.."img/weapons/passives/passive_rebound.png")
 modApi:appendAsset("img/weapons/weapons/weapon_rebound.png",            resourcePath.."img/weapons/weapons/weapon_rebound.png")
 modApi:appendAsset("img/weapons/passives/passive_spikycleats.png", resourcePath.."img/weapons/passives/passive_spikycleats.png")
+modApi:appendAsset("img/weapons/passives/passive_materia.png", resourcePath.."img/weapons/passives/passive_materia.png")
 modApi:appendAsset("img/units/passive/pawn_rebound.png", resourcePath .."img/units/passive/pawn_rebound.png")

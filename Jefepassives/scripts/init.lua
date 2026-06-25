@@ -28,6 +28,7 @@ function mod:init()
 	require(self.scriptPath .. "weapons/passive_rst_decoy")
 	require(self.scriptPath .. "weapons/passive_rebound")
 	require(self.scriptPath .. "weapons/passive_spikycleats")
+	require(self.scriptPath .. "weapons/passive_materia")
 
 	modApi:addWeaponDrop("Jefepassives_AcidRain_Passive")
 	modApi:addWeaponDrop("Jefepassives_CancelNearbyAttacks_Passive")
@@ -36,6 +37,7 @@ function mod:init()
 	modApi:addWeaponDrop("Jefepassives_RstDecoy")
 	modApi:addWeaponDrop("Jefepassives_SpikyCleats_Passive")
 	modApi:addWeaponDrop("Jefepassives_Rebound_Passive")
+	modApi:addWeaponDrop("Jefepassives_Materia_Passive")
 end
 
 function mod:load(options, version)

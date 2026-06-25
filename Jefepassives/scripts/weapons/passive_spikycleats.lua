@@ -12,7 +12,6 @@ Jefepassives_SpikyCleats_Passive = PassiveSkill:new{
 		Unit = Point (2,2),
 		CustomPawn = "PunchMech",
         	Target = Point(2,2),
-        	Enemy = Point(2,2),
 	}
 }
 function Jefepassives_SpikyCleats_Passive:GetSkillEffect(p1,p2)

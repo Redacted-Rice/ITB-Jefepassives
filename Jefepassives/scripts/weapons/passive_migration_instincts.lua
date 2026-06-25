@@ -130,6 +130,8 @@ function Jefepassives_MigratoryInvoker:getFormationOffset(duckCount)
 end
 
 function Jefepassives_MigratoryInvoker:addDuckFlyover(effect)
+	effect:AddSound("/props/airstrike")
+	
 	local duckCount = self:getNumDucks()
 	local leadDuckOffset = self:chooseLeadOffset(duckCount)
 	local spaceOffset = self:getFormationOffset(duckCount)

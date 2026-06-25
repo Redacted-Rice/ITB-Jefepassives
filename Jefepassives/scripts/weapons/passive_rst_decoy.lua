@@ -1,74 +1,95 @@
+local boardUtils = mod_loader.mods[modApi.currentMod].libs.boardUtils
+
 local a = ANIMS
 
--- TODO: Need to actually position right
+-- The loading paths and image loading approach are super finicky for pawns apparantly
+-- This finally seems to be a location and load apporach that works for whatever reason
 a.jp_rst_decoy = a.BaseUnit:new{
-	Image = "effects/fake_building_standing.png",
-	PosX = -18,
-	PosY = -1,
+	Image = "units/passive/fake_building_standing.png",
+	PosX = -28,
+	PosY = -10,
+}
+a.jp_rst_decoy2 = a.jp_rst_decoy:new{
+	Image = "units/passive/fake_building2_standing.png",
 }
 
+local shutterTime = 0.06
+local pauseTime = 0.32
+local fallTime = 0.12
 a.jp_rst_decoyd = a.jp_rst_decoy:new{
-	Image = "effects/fake_building_a.png",
-	PosX = -34,
-	PosY = -9,
-	NumFrames = 10,
-	Time = 0.09,
+	Image = "units/passive/fake_building_a.png",
+	PosX = -53,
+	PosY = -10,
+	NumFrames = 13,
+	Lengths = {
+		shutterTime, shutterTime, shutterTime, pauseTime,
+		fallTime, fallTime, fallTime, fallTime, fallTime,
+		fallTime, fallTime, fallTime, fallTime,
+	},
 	Loop = false,
 }
-
-a.jp_rst_decoy_flat = a.BaseUnit:new{
-	Image = "effects/fake_building_flat.png",
-	PosX = -18,
-	PosY = -1,
+a.jp_rst_decoy2d = a.jp_rst_decoyd:new{
+	Image = "units/passive/fake_building2_a.png",
 }
 
--- TODO: Need to make on players team but originally when I tried it kept crashing the game
--- Its still crashing as it is when I try to attack with mechs for some reason
-Jefepassives_RstDecoy_Pawn = {
+Jefepassives_RstDecoy_Pawn = Pawn:new{
 	Name = "RST Decoy",
 	Health = 1,
 	Neutral = true,
-	MoveSpeed = 0,
 	Image = "jp_rst_decoy",
-	Pushable = false,
-	IsPortrait = false,
-	DefaultTeam = TEAM_NONE,
-	IgnoreSmoke = true,
 	ImpactMaterial = IMPACT_ROCK,
-	SoundLocation = "/support/rock/",
+	MoveSpeed = 0,
+	SkillList = { },
+	DefaultTeam = TEAM_PLAYER,
+	Pushable = false,
+	IgnoreSmoke = true,
+	IgnoreFlip = true,
+	IsPortrait = false,
+	SpaceColor = false,
 }
 AddPawn("Jefepassives_RstDecoy_Pawn")
 
--- TODO: Eventually use a different image that is metal instead of wood/cardboard looking
-Jefepassives_RstDecoy_Pawn_Reinforced = {
+Jefepassives_RstDecoy_Pawn_Reinforced = Pawn:new{
 	Name = "RST Decoy",
 	Health = 4,
 	Neutral = true,
+	Image = "jp_rst_decoy2",
+	ImpactMaterial = IMPACT_METAL,
 	MoveSpeed = 0,
-	Image = "jp_rst_decoy",
+	SkillList = { },
+	DefaultTeam = TEAM_PLAYER,
 	Pushable = false,
-	IsPortrait = false,
-	DefaultTeam = TEAM_NONE,
 	IgnoreSmoke = true,
-	ImpactMaterial = IMPACT_ROCK,
-	SoundLocation = "/support/rock/",
+	IgnoreFlip = true,
+	IgnoreFire = true,
+	IsPortrait = false,
+	SpaceColor = false,
 }
 AddPawn("Jefepassives_RstDecoy_Pawn_Reinforced")
 
 Jefepassives_RstDecoy = PassiveSkill:new{
 	Name = "RST Decoy",
-	Description = "At mission start, sets up a decoy structure on a random, open tile.",
+	Description = "At mission start setups a decoy on a random tile.",
 	Icon = "weapons/passives/passive_rst_decoy.png",
 	Rarity = 1,
-	PowerCost = 0,
+	PowerCost = 1,
 	Damage = 0,
 	Upgrades = 2,
-	UpgradeCost = {2, 2},
+	UpgradeCost = {1, 1},
 	DecoyCount = 1,
 	Reinforced = false,
 	TipImage = {
+		CustomPawn = "Jefepassives_RstDecoy_Pawn",
 		Unit = Point(2, 2),
+		Building = Point(2, 1),
+		Enemy = Point(2,3),
 	},
+	DecoyPawnTypes = {
+		Jefepassives_RstDecoy_Pawn = true,
+		Jefepassives_RstDecoy_Pawn_Reinforced = true,
+	},
+	PlanEnvOriginalKey = "_jefepassivesRstDecoyPlanEnvOriginal",
+	Debug = true,
 }
 
 local passiveEffect = mod_loader.mods[modApi.currentMod].libs.passiveEffect
@@ -78,6 +99,12 @@ Weapon_Texts.Jefepassives_RstDecoy_Upgrade1 = "Reinforced"
 Jefepassives_RstDecoy_A = Jefepassives_RstDecoy:new{
 	UpgradeDescription = "Decoys have +3 Health.",
 	Reinforced = true,
+	TipImage = {
+		CustomPawn = "Jefepassives_RstDecoy_Pawn_Reinforced",
+		Unit = Point(2, 2),
+		Building = Point(2, 1),
+		Enemy = Point(2,3),
+	},
 }
 
 Weapon_Texts.Jefepassives_RstDecoy_Upgrade2 = "Mass Produce"
@@ -90,57 +117,16 @@ Jefepassives_RstDecoy_AB = Jefepassives_RstDecoy_A:new{
 	DecoyCount = 2,
 }
 
-local DECOY_PAWN_TYPES = {
-	"Jefepassives_RstDecoy_Pawn",
-	"Jefepassives_RstDecoy_Pawn_Reinforced",
-}
-
-local function isDecoyPawn(pawn)
-	local pawnType = pawn:GetType()
-	for _, decoyType in ipairs(DECOY_PAWN_TYPES) do
-		if pawnType == decoyType then
-			return true
-		end
-	end
-	return false
+-- only a preview for passive skills
+function Jefepassives_RstDecoy:GetSkillEffect(p1, p2)
+	local ret = SkillEffect()
+	local spaceDamage = SpaceDamage(Point(2, 2), 3)
+	spaceDamage.sAnimation = "SwipeClaw2"
+	spaceDamage.sSound = "/enemy/scorpion_soldier_2/attack"
+	ret:AddMelee(Point(2, 3), spaceDamage)
+	return ret
 end
 
-local function getOccupiableTiles()
-	local candidates = {}
-	local boardSize = Board:GetSize()
-
-	for x = 0, boardSize.x - 1 do
-		for y = 0, boardSize.y - 1 do
-			local point = Point(x, y)
-			if Board:IsValid(point)
-				and not Board:IsPawnSpace(point)
-				and not Board:IsBuilding(point)
-				and Board:GetTerrain(point) ~= TERRAIN_MOUNTAIN
-				and not Board:IsBlocked(point, PATH_GROUND) then
-				table.insert(candidates, point)
-			end
-		end
-	end
-
-	return candidates
-end
-
-local function pickRandomTiles(count)
-	local candidates = getOccupiableTiles()
-	local picked = {}
-
-	for _ = 1, count do
-		if #candidates == 0 then
-			break
-		end
-
-		local index = math.random(1, #candidates)
-		table.insert(picked, candidates[index])
-		table.remove(candidates, index)
-	end
-
-	return picked
-end
 
 function Jefepassives_RstDecoy:getDecoyPawnType()
 	if self.Reinforced then
@@ -149,38 +135,118 @@ function Jefepassives_RstDecoy:getDecoyPawnType()
 	return "Jefepassives_RstDecoy_Pawn"
 end
 
--- TODO: Need to mark to avoid environment effects
-function Jefepassives_RstDecoy:spawnDecoys()
-	if not Board then
-		return
-	end
-
-	local pawnType = self:getDecoyPawnType()
-	local locations = pickRandomTiles(self.DecoyCount)
-
-	for _, location in ipairs(locations) do
-		if Board:IsValid(location) and not Board:IsPawnSpace(location) then
-			Board:AddPawn(pawnType, location)
-		end
-	end
-end
-
 function Jefepassives_RstDecoy:GetPassiveSkillEffect_MissionStartHook(mission)
-	self:spawnDecoys()
-end
+	local pawnType = self:getDecoyPawnType()
+	-- TODO: Decide on if I want it massive or not and what that means for the pathing
+	local choices = boardUtils.getSafeSpawnTiles(PATH_GROUND)
+	local spawnCount = math.min(self.DecoyCount, #choices)
+	if self.Debug then LOG(string.format("Jefepassives RST Decoy: Spawning %d pawns", spawnCount)) end
 
-function Jefepassives_RstDecoy:GetPassiveSkillEffect_PawnKilledHook(mission, pawn)
-	if not isDecoyPawn(pawn) then
-		return
+	if spawnCount < self.DecoyCount and self.Debug then
+		LOG(string.format("Jefepassives RST Decoy: only %d safe tile(s) available for %d decoy(s)",
+				#choices, self.DecoyCount))
 	end
 
-	local location = pawn:GetSpace()
-	if Board:IsValid(location) then
-		Board:AddAnimation(location, "jp_rst_decoy_flat", 1)
+	for i = 1, spawnCount do
+		local choice = random_removal(choices)
+		local decoy = PAWN_FACTORY:CreatePawn(pawnType)
+		Board:AddPawn(decoy, choice)
+		if self.Debug then LOG(string.format("Jefepassives RST Decoy: Spawned pawn at %s", choice:GetString())) end
 	end
 end
 
 passiveEffect:addPassiveEffect(
 	"Jefepassives_RstDecoy",
-	{"missionStartHook", "pawnKilledHook"}
+	{"missionStartHook"}
 )
+
+function Jefepassives_RstDecoy:isDecoyPawn(pawn)
+	return pawn and self.DecoyPawnTypes[pawn:GetType()]
+end
+
+function Jefepassives_RstDecoy:tempSetDecoysAsBuildings(changedTiles)
+	if not Board then
+		if self.Debug then LOG("Jefepassives RST Decoy: PlanEnvironment changing terrain skipped (no board or mission)") end
+		return 0
+	end
+
+	local count = 0
+	for _, pawnId in ipairs(extract_table(Board:GetPawns(TEAM_ANY))) do
+		local pawn = Board:GetPawn(pawnId)
+		if self:isDecoyPawn(pawn) then
+			local space = pawn:GetSpace()
+			if Board:IsValid(space) and changedTiles[space] == nil then
+				local terrain = Board:GetTerrain(space)
+				changedTiles[space] = terrain
+				Board:SetTerrain(space, TERRAIN_BUILDING)
+				count = count + 1
+				if self.Debug then
+					LOG(string.format("Jefepassives RST Decoy: changing %s (%s) terrain %d -> TERRAIN_BUILDING",
+							pawn:GetType(), space:GetString(), terrain))
+				end
+			end
+		end
+	end
+
+	if count == 0 and self.Debug then
+		LOG("Jefepassives RST Decoy: PlanEnvironment found no decoy tiles")
+	end
+	return count
+end
+
+function Jefepassives_RstDecoy:restoreDecoyOriginalTerrain(changedTiles)
+	local count = 0
+	for space, terrain in pairs(changedTiles) do
+		if Board and Board:IsValid(space) then
+			Board:SetTerrain(space, terrain)
+			count = count + 1
+			if self.Debug then
+				LOG(string.format("Jefepassives RST Decoy: restored %s to terrain %d",
+						space:GetString(), terrain))
+			end
+		end
+	end
+	return count
+end
+
+function Jefepassives_RstDecoy:installPlanEnvironmentWrapper()
+	if Mission[self.PlanEnvOriginalKey] then
+		return
+	end
+	Mission[self.PlanEnvOriginalKey] = Mission.PlanEnvironment
+	local oldPlanEnvironment = Mission[self.PlanEnvOriginalKey]
+	local passive = self
+
+	if self.Debug then LOG("Jefepassives RST Decoy: PlanEnvironment wrapper installed") end
+
+	function Mission:PlanEnvironment(...)
+		local turn = Game and Game:GetTurnCount() or -1
+		if passive.Debug then
+			LOG(string.format("Jefepassives RST Decoy: PlanEnvironment start (turn %d)", turn))
+		end
+
+		local changedTiles = {}
+		local disguisedCount = passive:tempSetDecoysAsBuildings(changedTiles)
+
+		local ok, result = pcall(oldPlanEnvironment, self, ...)
+		local restoredCount = passive:restoreDecoyOriginalTerrain(changedTiles)
+
+		if not ok then
+			if passive.Debug then
+				LOG(string.format("Jefepassives RST Decoy: PlanEnvironment failed after restoring %d tile(s): %s",
+						restoredCount, tostring(result)))
+			end
+			error(result)
+		end
+
+		if passive.Debug then
+			LOG(string.format("Jefepassives RST Decoy: PlanEnvironment done (turn %d, result=%s, disguised=%d, restored=%d)",
+				turn, tostring(result), disguisedCount, restoredCount))
+		end
+		return result
+	end
+end
+
+modApi.events.onModsLoaded:subscribe(function()
+	Jefepassives_RstDecoy:installPlanEnvironmentWrapper()
+end)

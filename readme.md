@@ -32,3 +32,5 @@ Place the `Jefepassives` folder in `Into the Breach/mods/`. When you open the fo
 | Mines Dispenser | Truelch | `jefepassives_DeployItems_Passive` | At the start mission deploy 3 "Items" on random empty tiles.<br>These "Items" are Repair Platforms, but can also be Mines with upgrades. |
 | Rebound Satellite | TheBoardsCousin | `Jefepassives_Rebound_Passive` | At mission start, summon an Orbital Unit which can rebound pushing artilleries off allied units. |
 | RST Decoy | Das Keifer | `Jefepassives_RstDecoy` | At mission start, sets up a decoy structure on a random, open tile. |
+| Loneliness Amplifier | Tatu | `Jefepassives_Loneliness_Passive` | Vek take emotional damage if ending turn with no adjacent units. |
+| Awkwardness Inducer | Tatu | `Jefepassives_Awkwardness_Passive` | Vek take social anxiety damage if ending turn adjacent to other units. |

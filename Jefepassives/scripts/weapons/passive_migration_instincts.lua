@@ -7,7 +7,7 @@ local DUCK_FLYOVER_STAGGER = 0.12
 local boardUtils = mod_loader.mods[modApi.currentMod].libs.boardUtils
 
 Jefepassives_MigratoryInvoker = PassiveSkill:new{
-	Name = "Migratory Invoker",
+	Name = "Migratory Evoker",
 	Description = "At the start of the Vek turn, each Vek attempts to move one tile to the right.",
 	Icon = "weapons/passives/passive_migration_instincts.png",
 	Rarity = 1,

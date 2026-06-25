@@ -6,7 +6,7 @@ local DUCK_FLYOVER_STAGGER = 0.12
 
 local boardUtils = mod_loader.mods[modApi.currentMod].libs.boardUtils
 
-Jefepassives_MigratoryInvoker = PassiveSkill:new{
+Jefepassives_MigratoryEvoker = PassiveSkill:new{
 	Name = "Migratory Evoker",
 	Description = "At the start of the Vek turn, each Vek attempts to move one tile to the right.",
 	Icon = "weapons/passives/passive_migration_instincts.png",
@@ -25,10 +25,10 @@ Jefepassives_MigratoryInvoker = PassiveSkill:new{
 }
 
 local passiveEffect = mod_loader.mods[modApi.currentMod].libs.passiveEffect
-Jefepassives_MigratoryInvoker.passiveEffect = passiveEffect
+Jefepassives_MigratoryEvoker.passiveEffect = passiveEffect
 
-Weapon_Texts.Jefepassives_MigratoryInvoker_Upgrade1 = "Potency"
-Jefepassives_MigratoryInvoker_A = Jefepassives_MigratoryInvoker:new{
+Weapon_Texts.Jefepassives_MigratoryEvoker_Upgrade1 = "Potency"
+Jefepassives_MigratoryEvoker_A = Jefepassives_MigratoryEvoker:new{
 	UpgradeDescription = "Vek move up to half their move speed (rounded down, minimum 1) instead.",
 	ExtendedMigration = true,
 	minDucks = 5,
@@ -36,7 +36,7 @@ Jefepassives_MigratoryInvoker_A = Jefepassives_MigratoryInvoker:new{
 }
 
 -- Preview only
-function Jefepassives_MigratoryInvoker:GetSkillEffect(p1, p2)
+function Jefepassives_MigratoryEvoker:GetSkillEffect(p1, p2)
 	local ret = SkillEffect()
 
 	self:addDuckFlyover(ret)
@@ -58,12 +58,12 @@ function Jefepassives_MigratoryInvoker:GetSkillEffect(p1, p2)
 	return ret
 end
 
-function Jefepassives_MigratoryInvoker:getReachableMigrationSpaces(pawn, maxSteps)
+function Jefepassives_MigratoryEvoker:getReachableMigrationSpaces(pawn, maxSteps)
 	local start = pawn:GetSpace()
 	return extract_table(Board:GetReachable(start, maxSteps, pawn:GetPathProf()))
 end
 
-function Jefepassives_MigratoryInvoker:getMigrationSpeed(pawn)
+function Jefepassives_MigratoryEvoker:getMigrationSpeed(pawn)
 	local pawnSpeed = pawn:GetMoveSpeed()
 	if pawnSpeed == 0 then
 		return 0
@@ -74,7 +74,7 @@ function Jefepassives_MigratoryInvoker:getMigrationSpeed(pawn)
 	return math.max(1, math.floor(pawnSpeed / 2))
 end
 
-function Jefepassives_MigratoryInvoker:scoreMigrationDestination(start, point, direction)
+function Jefepassives_MigratoryEvoker:scoreMigrationDestination(start, point, direction)
 	local delta = point - start
 	local progress = delta.x * direction.x + delta.y * direction.y
 
@@ -86,7 +86,7 @@ function Jefepassives_MigratoryInvoker:scoreMigrationDestination(start, point, d
 	return progress * 1000 - perpendicular
 end
 
-function Jefepassives_MigratoryInvoker:getMigrationDestination(pawn, direction, maxSteps, reserved)
+function Jefepassives_MigratoryEvoker:getMigrationDestination(pawn, direction, maxSteps, reserved)
 	if maxSteps <= 0 then
 		return nil
 	end
@@ -107,29 +107,29 @@ function Jefepassives_MigratoryInvoker:getMigrationDestination(pawn, direction, 
 	return best
 end
 
-function Jefepassives_MigratoryInvoker:appendDuckAirstrike(effect, space)
+function Jefepassives_MigratoryEvoker:appendDuckAirstrike(effect, space)
 	effect:AddAirstrike(space, DUCK_FLYOVER_IMAGE)
 	local tbl = extract_table(effect.effect)
 	tbl[#tbl].fDelay = 0
 end
 
-function Jefepassives_MigratoryInvoker:getNumDucks()
+function Jefepassives_MigratoryEvoker:getNumDucks()
 	local min = math.min(Board:GetSize().y, self.minDucks)
 	local max = math.min(Board:GetSize().y, self.maxDucks)
 	return math.random(min, max)
 end
 
-function Jefepassives_MigratoryInvoker:chooseLeadOffset(duckCount)
+function Jefepassives_MigratoryEvoker:chooseLeadOffset(duckCount)
 	return math.random(1, duckCount - 2)
 end
 
-function Jefepassives_MigratoryInvoker:getFormationOffset(duckCount)
+function Jefepassives_MigratoryEvoker:getFormationOffset(duckCount)
 	local boardSize = Board:GetSize().y
 	-- board size is 8. For 5 this chooses between 0 and 3. for 7 it chooses between 0 and 1.
 	return math.random(0, boardSize - duckCount)
 end
 
-function Jefepassives_MigratoryInvoker:addDuckFlyover(effect)
+function Jefepassives_MigratoryEvoker:addDuckFlyover(effect)
 	effect:AddSound("/props/airstrike")
 
 	local duckCount = self:getNumDucks()
@@ -175,7 +175,7 @@ function Jefepassives_MigratoryInvoker:addDuckFlyover(effect)
 	effect:AddDelay(1)
 end
 
-function Jefepassives_MigratoryInvoker:addMigrationMoves(effect)
+function Jefepassives_MigratoryEvoker:addMigrationMoves(effect)
 	local reserved = {}
 	local moves = {}
 
@@ -209,14 +209,14 @@ function Jefepassives_MigratoryInvoker:addMigrationMoves(effect)
 	return #moves > 0
 end
 
-function Jefepassives_MigratoryInvoker:migrateEnemies()
+function Jefepassives_MigratoryEvoker:migrateEnemies()
 	local effect = SkillEffect()
 	self:addDuckFlyover(effect)
 	self:addMigrationMoves(effect)
 	Board:AddEffect(effect)
 end
 
-function Jefepassives_MigratoryInvoker:GetPassiveSkillEffect_OnNextTurn(mission)
+function Jefepassives_MigratoryEvoker:GetPassiveSkillEffect_OnNextTurn(mission)
 	if Game:GetTeamTurn() ~= TEAM_ENEMY then
 		LOG("NO MIGRATE " .. Game:GetTeamTurn() .. " -----------")
 		return
@@ -226,6 +226,6 @@ function Jefepassives_MigratoryInvoker:GetPassiveSkillEffect_OnNextTurn(mission)
 end
 
 passiveEffect:addPassiveEffect(
-	"Jefepassives_MigratoryInvoker",
+	"Jefepassives_MigratoryEvoker",
 	{"onNextTurn"}
 )

@@ -33,9 +33,9 @@ Known issues:
 ]]
 
 
-Jefepassives_AcidRain_Passive = PassiveSkill:new{
+Jefepassives_AcidRain = PassiveSkill:new{
 	--Infos
-	Name = "A.C.I.D. Rain",
+	Name = "A.C.I.D. Rain", --A.C.I.Difier --A.C.I.Dispenser
 	Description = "At the start of every turn, create an A.C.I.D. pool randomly on the map.",
 	PowerCost = 0,
 	Icon = "weapons/passives/passive_acid_rain.png",
@@ -46,7 +46,7 @@ Jefepassives_AcidRain_Passive = PassiveSkill:new{
 	UpgradeList = { "Heal", "Boost" },
 
 	--Passive
-	Passive = "Jefepassives_AcidRain_Passive",
+	Passive = "Jefepassives_AcidRain",
 
 	--Tip image
 	TipHeal = false,
@@ -60,7 +60,7 @@ Jefepassives_AcidRain_Passive = PassiveSkill:new{
 	},
 }
 
-function Jefepassives_AcidRain_Passive:GetSkillEffect(p1, p2)
+function Jefepassives_AcidRain:GetSkillEffect(p1, p2)
 	local ret = SkillEffect()
 
 	if not self.TipHeal and not self.TipBoost then
@@ -94,22 +94,22 @@ function Jefepassives_AcidRain_Passive:GetSkillEffect(p1, p2)
 	return ret
 end
 
-Jefepassives_AcidRain_Passive_A = Jefepassives_AcidRain_Passive:new{
+Jefepassives_AcidRain_A = Jefepassives_AcidRain:new{
 	UpgradeDescription = "Standing on A.C.I.D. removes A.C.I.D. and repairs Mech.\nA.C.I.D. can now appear on pawns.\nPowering both upgrades increases the A.C.I.D. spawn amount by 1.",
 	TipHeal = true,
-	Passive = "Jefepassives_AcidRain_Passive_A",
+	Passive = "Jefepassives_AcidRain_A",
 }
 
-Jefepassives_AcidRain_Passive_B = Jefepassives_AcidRain_Passive:new{
+Jefepassives_AcidRain_B = Jefepassives_AcidRain:new{
 	UpgradeDescription = "Standing on A.C.I.D. removes A.C.I.D. and gives the Mech Boost.\nA.C.I.D. can now appear on pawns.\nPowering both upgrades increases the A.C.I.D. spawn amount by 1.",
 	TipBoost = true,
-	Passive = "Jefepassives_AcidRain_Passive_B",
+	Passive = "Jefepassives_AcidRain_B",
 }
 
-Jefepassives_AcidRain_Passive_AB = Jefepassives_AcidRain_Passive:new{
+Jefepassives_AcidRain_AB = Jefepassives_AcidRain:new{
 	TipHeal = true,
 	TipBoost = true,
-	Passive = "Jefepassives_AcidRain_Passive_AB",
+	Passive = "Jefepassives_AcidRain_AB",
 }
 
 --Create A.C.I.D. pool randomly on the map
@@ -122,6 +122,7 @@ local function getRandomPos(allowPawns)
 			--maybe I should allow tiles occupied by pawns? I don't think so but I'm asking myself
 			if (allowPawns and Board:IsPawnSpace(curr) or not Board:IsBlocked(curr, PATH_PROJECTILE))				 
 				and not Board:IsItem(curr)
+				and not Board:IsPod(curr)
 				--Or just exclude water?
 				and (Board:GetTerrain(curr) == TERRAIN_ROAD or Board:GetTerrain(curr) == TERRAIN_FOREST or Board:GetTerrain(curr) == TERRAIN_SAND)
 				--and not Board:IsFire(curr) --maybe?
@@ -141,19 +142,22 @@ local function getRandomPos(allowPawns)
 end
 
 local function computeAcidSpawns(points)
+	local effect = SkillEffect()
 	for _, pos in ipairs(points) do
-		--Board:SetWeather(3, RAIN_ACID, Point(0,0), Point(8,8), 2)
-		Board:SetWeather(5, RAIN_ACID, pos, Point(1, 1), 2) --maybe super intense just on the point?
-		--Board:SetWeather(5, RAIN_ACID, pos - Point(1, 1), Point(2, 2), 2) --maybe super intense just on the point?
-		Board:SetAcid(pos, true)
-		Board:AddAlert(pos, "A.C.I.D. RAIN")
+		effect:AddScript([[
+			Board:SetWeather(5, RAIN_ACID, ]]..pos:GetString()..[[, Point(1, 1), 2)
+			Board:SetAcid(]]..pos:GetString()..[[, true)
+			Board:AddAlert(]]..pos:GetString()..[[, "A.C.I.D. RAIN")]])
+		effect:AddDelay(2)
 	end
+	Board:AddEffect(effect)
 end
 
 local EVENT_onNextTurn = function(mission)
 	if Game:GetTeamTurn() == TEAM_PLAYER then
 
 		--Reset mission data
+		--redundant with mission?
 		local m = GetCurrentMission()
 		if m == nil then
 			LOG("mission is nil, WTF!")
@@ -163,15 +167,15 @@ local EVENT_onNextTurn = function(mission)
 			m.passive_acid_rain_spawns = {}
 		end
 		
-		if IsPassiveSkill("Jefepassives_AcidRain_Passive") then --also works for upgraded versions right?
+		if IsPassiveSkill("Jefepassives_AcidRain") then --also works for upgraded versions right?
 
 			local spawnAmount = 1
-			if IsPassiveSkill("Jefepassives_AcidRain_Passive_AB") then
+			if IsPassiveSkill("Jefepassives_AcidRain_AB") then
 				spawnAmount = 2
 			end
 
 			local allowPawns = false
-			if IsPassiveSkill("Jefepassives_AcidRain_Passive_A") or IsPassiveSkill("Jefepassives_AcidRain_Passive_B") then
+			if IsPassiveSkill("Jefepassives_AcidRain_AB") or IsPassiveSkill("Jefepassives_AcidRain_A") or IsPassiveSkill("Jefepassives_AcidRain_B") then
 				allowPawns = true
 			end
 
@@ -194,10 +198,11 @@ local EVENT_onNextTurn = function(mission)
 end
 modApi.events.onNextTurn:subscribe(EVENT_onNextTurn)
 
-
+--TODO: clear at player end turn the mission.passive_water_spawns data?
 local EVENT_onResetTurn = function(mission)
 	--LOG("jefepassives_AcidRain_Passive -> EVENT_onResetTurn")
-	modApi:scheduleHook(550, function() --can't recall if it's really a needed precaution, but...
+	 --can't recall if it's really a needed precaution, but...
+	modApi:scheduleHook(550, function() --TODO: change that into an appropriate conditional hook
 		if mission ~= nil and mission.passive_acid_rain_spawns ~= nil then
 			computeAcidSpawns(mission.passive_acid_rain_spawns)
 		end
@@ -207,18 +212,17 @@ modapiext.events.onResetTurn:subscribe(EVENT_onResetTurn)
 
 local HOOK_onPawnIsAcid = function(mission, pawn, isAcid)
 	--IsPassiveSkill("jefepassives_AcidRain_Passive_B") should work for both _B and _AB but for some reason, it's false for _AB
-	local isHeal  = IsPassiveSkill("Jefepassives_AcidRain_Passive_A") or IsPassiveSkill("Jefepassives_AcidRain_Passive_AB")
-	local isBoost = IsPassiveSkill("Jefepassives_AcidRain_Passive_B") or IsPassiveSkill("Jefepassives_AcidRain_Passive_AB")
+	local isHeal  = IsPassiveSkill("Jefepassives_AcidRain_A") or IsPassiveSkill("Jefepassives_AcidRain_AB")
+	local isBoost = IsPassiveSkill("Jefepassives_AcidRain_B") or IsPassiveSkill("Jefepassives_AcidRain_AB")
 
 	--[[
 	LOG(">>>>>>>>>> HOOK_onPawnIsAcid -> isHeal: "..tostring(isHeal)..", isBoost: "..tostring(isBoost))
 
-	LOG("-> is jefepassives_AcidRain_Passive   : "..tostring(IsPassiveSkill("Jefepassives_AcidRain_Passive"   )))
-	LOG("-> is jefepassives_AcidRain_Passive_A : "..tostring(IsPassiveSkill("Jefepassives_AcidRain_Passive_A" )))
-	LOG("-> is jefepassives_AcidRain_Passive_B : "..tostring(IsPassiveSkill("Jefepassives_AcidRain_Passive_B" ))) --this was false with _AB, wtf
-	LOG("-> is jefepassives_AcidRain_Passive_AB: "..tostring(IsPassiveSkill("Jefepassives_AcidRain_Passive_AB")))
+	LOG("-> is jefepassives_AcidRain   : "..tostring(IsPassiveSkill("Jefepassives_AcidRain"   )))
+	LOG("-> is jefepassives_AcidRain_A : "..tostring(IsPassiveSkill("Jefepassives_AcidRain_A" )))
+	LOG("-> is jefepassives_AcidRain_B : "..tostring(IsPassiveSkill("Jefepassives_AcidRain_B" ))) --this was false with _AB, wtf
+	LOG("-> is jefepassives_AcidRain_AB: "..tostring(IsPassiveSkill("Jefepassives_AcidRain_AB")))
 	]]
-
 
 	local m = GetCurrentMission()
 	if m == nil then

@@ -88,11 +88,6 @@ function mod:init(options)
 	modApi:addWeaponDrop("Jefepassives_Rebound_Passive")
 	modApi:addWeaponDrop("Jefepassives_RstDecoy")
 	modApi:addWeaponDrop("Jefepassives_SpikyCleats_Passive")
-end
-
-function mod:load(options, version)
-	self.chronoBeaconEnabled = false
-	self.chronoBeaconNeedsMemhack = false
 
 	if isOptionEnabled(options, "includeChronoBeacon") then
 		LOG("ENABLED")
@@ -100,13 +95,16 @@ function mod:load(options, version)
 			"img/weapons/passives/passive_chrono_homing.png",
 			self.resourcePath .. "img/weapons/passives/passive_chrono_homing.png"
 		)
+		modApi:appendAsset(
+			"img/effects/chrono_debris.png",
+			self.resourcePath .. "img/effects/chrono_debris.png"
+		)
 		require(self.scriptPath .. "weapons/passive_chrono_beacons")
-		modApi:addWeaponDrop("Jefepassives_ChronoBeacons_Passive")
+		modApi:addWeaponDrop("Jefepassives_ChronoBeacons")
 	end
 end
 
 function mod:load(options, version)
-	self.libs.passiveEffect:load()
 	if isOptionEnabled(options, "includeChronoBeacon") and 
 			not isMemhackAvailableAndEnabled() then
 		showChronoMemhackWarning()

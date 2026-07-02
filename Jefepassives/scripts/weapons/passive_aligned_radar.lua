@@ -79,7 +79,7 @@ Jefepassives_AlignedRadar = PassiveSkill:new{
 	--Description = "Other Aligned allies get +1 damage on their weapons.", --V2
 
 	PowerCost = 1, --I'm not sure, certainly should be 2 cores
-	Icon = "weapons/passives/passive_mark_random.png", --TODO
+	Icon = "weapons/passives/passive_aligned_radar.png",
 
 	--Passive
 	Passive = "Jefepassives_AlignedRadar",

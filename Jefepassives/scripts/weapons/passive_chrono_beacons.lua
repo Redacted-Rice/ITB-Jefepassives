@@ -146,10 +146,6 @@ Jefepassives_ChronoBeacons = PassiveSkill:new{
 }
 
 Weapon_Texts.Jefepassives_ChronoBeacons_Upgrade1 = "Overcharged"
-Jefepassives_ChronoBeacons_A = Jefepassives_ChronoBeacons:new{
-	UpgradeDescription = "After deployment, a chrono debris fragment strikes the weakest Vek for 2 damage.",
-	Overcharged = true,
-}
 
 function Jefepassives_ChronoBeacons.queueChronoDebrisFlight(target)
 	local timing = getChronoDebrisTiming(target)
@@ -174,7 +170,6 @@ function Jefepassives_ChronoBeacons:buildChronoDebrisEffect(target)
 
 	local timing = getChronoDebrisTiming(target)
 
-	
 	effect:AddScript([[local p = ]] .. target:GetString() .. [[
 			Board:AddAlert(p, "DEBRIS INCOMING")
 			Board:Ping(p, GL_Color(255, 50, 50))]])
@@ -216,7 +211,7 @@ function Jefepassives_ChronoBeacons:getVekPriorityTier(pawn)
 	if pawnTypeUtils.isSpawnCategory(pawn, "Leader") then
 		return 3
 	end
-	if pawn.Tier == TIER_ALPHA then	
+	if pawn.Tier == TIER_ALPHA then
 		return 2
 	end
 	if pawnTypeUtils.isSpawnCategory(pawn, "Unique") then
@@ -280,7 +275,6 @@ function Jefepassives_ChronoBeacons:GetPassiveSkillEffect_OnDeploymentPhaseEnd()
 	end
 
 	if not Board.SetPodLandingPoint then
-		LOG("WARNING: Chrono Beacons active but RedactedRice Memhack is not enabled! Passive will not fully function")
 		return
 	end
 
@@ -333,10 +327,30 @@ function Jefepassives_ChronoBeacons:GetPassiveSkillEffect_OnGameExited()
 	chronoDebrisFlight = nil
 end
 
-passiveEffect:addPassiveEffect(
-	"Jefepassives_ChronoBeacons",
-	{
-		"onDeploymentPhaseEnd", "onPodLanded",
-		"onFrameDrawStart", "onGameExited"
+function Jefepassives_ChronoBeacons:init(fullChronoBeacons)
+	if fullChronoBeacons then
+		Jefepassives_ChronoBeacons_A = Jefepassives_ChronoBeacons:new{
+			UpgradeDescription = "After deployment, a chrono debris fragment strikes the weakest Vek for 2 damage.",
+			Overcharged = true,
+		}
+	else
+		Jefepassives_ChronoBeacons.PowerCost = 1
+		Jefepassives_ChronoBeacons.Upgrades = 0
+		Jefepassives_ChronoBeacons.Overcharged = true
+		Jefepassives_ChronoBeacons.Description =
+				"After deployment, a chrono debris fragment strikes the weakest Vek for 2 damage."
+	end
+
+	local hooks = {
+		"onDeploymentPhaseEnd",
+		"onFrameDrawStart",
+		"onGameExited",
 	}
-)
+	if fullChronoBeacons then
+		table.insert(hooks, "onPodLanded")
+	end
+
+	passiveEffect:addPassiveEffect("Jefepassives_ChronoBeacons", hooks)
+end
+
+return Jefepassives_ChronoBeacons

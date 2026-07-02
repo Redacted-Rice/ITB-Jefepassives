@@ -15,14 +15,14 @@ local mod = {
 
 local function isOptionEnabled(options, optionId)
 	return options
-		and options[optionId]
-		and options[optionId].enabled
+			and options[optionId]
+			and options[optionId].enabled
 end
 
 local function isMemhackAvailableAndEnabled()
 	local initData = mod_loader.mods["redactedrice_memhack"]
 	local settingData = modApi:getCurrentModConfiguration()["redactedrice_memhack"]
-	return initData and initData.initialized and 
+	return initData and initData.initialized and
 			settingData and settingData.enabled
 end
 
@@ -30,9 +30,12 @@ local function showChronoMemhackWarning()
 	modApi:scheduleHook(50, function()
 		sdlext.showInfoDialog(
 			"Requirement Warning",
-			"!! RESTART REQUIRED !!\n\n"..
-			"The Jefepassive's Chrono Beacons requires RedactedRice Memhack extension which is not installed and enabled." .. 
-			" Either install and enable it or disable \"Include Chrono Beacon passive\" in Jefepassives settings. Then restart the game.",
+			"RedactedRice Memhack is not installed and enabled.\n\n"..
+			"Chrono Beacons will still be available, but without Memhack it only "..
+			"will do its upgrade effect as the primary effect - "..
+			"It will not redirect Time Pods.\n\n"..
+			"Install and enable RedactedRice Memhack for the full effect, then restart the game "..
+			"or you can remove this warning from the mod options.",
 			nil,
 			{
 				minW = 600,
@@ -44,9 +47,10 @@ end
 
 function mod:metadata()
 	modApi:addGenerationOption(
-		"includeChronoBeacon",
-		"Include Chrono Beacon passive",
-		"Adds the Chrono Beacons passive weapon to the drop pool. Requires the RedactedRice Memhack extension.",
+		"fullChronoBeacons",
+		"Enabled Full Chrono Beacon Effect",
+		"Enables the full effect of the Chrono Beacons passive weapon. If not enabled, "..
+		"the upgrade effect will become the primary effect. Requires the RedactedRice Memhack extension.",
 		{ enabled = true }
 	)
 end
@@ -89,26 +93,17 @@ function mod:init(options)
 	modApi:addWeaponDrop("Jefepassives_RstDecoy")
 	modApi:addWeaponDrop("Jefepassives_SpikyCleats_Passive")
 
-	if isOptionEnabled(options, "includeChronoBeacon") then
-		LOG("ENABLED")
-		modApi:appendAsset(
-			"img/weapons/passives/passive_chrono_homing.png",
-			self.resourcePath .. "img/weapons/passives/passive_chrono_homing.png"
-		)
-		modApi:appendAsset(
-			"img/effects/chrono_debris.png",
-			self.resourcePath .. "img/effects/chrono_debris.png"
-		)
-		require(self.scriptPath .. "weapons/passive_chrono_beacons")
-		modApi:addWeaponDrop("Jefepassives_ChronoBeacons")
-	end
+	-- chrono beacons has some special handling
+	local chronoBeacons = require(self.scriptPath .. "weapons/passive_chrono_beacons")
+	chronoBeacons.init(isOptionEnabled(options, "fullChronoBeacons"))
+	modApi:addWeaponDrop("Jefepassives_ChronoBeacons")
 end
 
 function mod:load(options, version)
-	if isOptionEnabled(options, "includeChronoBeacon") and 
-			not isMemhackAvailableAndEnabled() then
+	if not isOptionEnabled(options, "fullChronoBeacons") and
+            not isMemhackAvailableAndEnabled() then
 		showChronoMemhackWarning()
-		LOG("Jefepassives: Chrono Beacons is enabled in mod options but Mem Hack is not enabled.")
+		LOG("Jefepassives: Memhack is not enabled. Chrono Beacons will use its reduced effect only.")
 	end
 end
 

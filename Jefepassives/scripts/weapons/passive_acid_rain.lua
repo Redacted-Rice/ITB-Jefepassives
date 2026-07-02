@@ -113,7 +113,7 @@ Jefepassives_AcidRain_AB = Jefepassives_AcidRain:new{
 }
 
 --Create A.C.I.D. pool randomly on the map
-local function getRandomPos(allowPawns)
+local function getRandomPos(allowPawns, points)
 	local list = {}
 
 	for j = 0, 7 do
@@ -126,6 +126,7 @@ local function getRandomPos(allowPawns)
 				--Or just exclude water?
 				and (Board:GetTerrain(curr) == TERRAIN_ROAD or Board:GetTerrain(curr) == TERRAIN_FOREST or Board:GetTerrain(curr) == TERRAIN_SAND)
 				--and not Board:IsFire(curr) --maybe?
+				and not list_contains(points, curr)
 				and not Board:IsAcid(curr) then
 					list[#list + 1] = curr
 			end
@@ -182,7 +183,7 @@ local EVENT_onNextTurn = function(mission)
 			local points = {}
 
 			for i = 1, spawnAmount do
-				local pos = getRandomPos(allowPawns)
+				local pos = getRandomPos(allowPawns, points)
 
 				points[#points+1] = pos
 

@@ -1,8 +1,8 @@
 local mod = {
 	id = "jefepassives",
-	name = "Jefe Passives",
+	name = "Jefepassives",
 	icon = "img/mod_icon.png",
-	version = "0.1.2",
+	version = "0.8.0",
 	modApiVersion = "2.9.5",
 	gameVersion = "1.2.93",
 	description = "A community pack of passive weapons made for our community YouTuber Jefepato",
@@ -35,7 +35,7 @@ local function showChronoMemhackWarning()
 			"will do its upgrade effect as the primary effect - "..
 			"It will not redirect Time Pods.\n\n"..
 			"Install and enable RedactedRice Memhack for the full effect, then restart the game "..
-			"or you can remove this warning from the mod options.",
+			"or you can remove this warning by disabling the full effect in the mod options.",
 			nil,
 			{
 				minW = 600,
@@ -49,7 +49,7 @@ function mod:metadata()
 	modApi:addGenerationOption(
 		"fullChronoBeacons",
 		"Enabled Full Chrono Beacon Effect",
-		"Enables the full effect of the Chrono Beacons passive weapon. If not enabled, "..
+		"!!! REQUIRES RESTART !!!\n\nEnables the full effect of the Chrono Beacons passive weapon. If not enabled, "..
 		"the upgrade effect will become the primary effect. Requires the RedactedRice Memhack extension.",
 		{ enabled = true }
 	)
@@ -95,12 +95,12 @@ function mod:init(options)
 
 	-- chrono beacons has some special handling
 	local chronoBeacons = require(self.scriptPath .. "weapons/passive_chrono_beacons")
-	chronoBeacons.init(isOptionEnabled(options, "fullChronoBeacons"))
+	chronoBeacons:init(isOptionEnabled(options, "fullChronoBeacons"))
 	modApi:addWeaponDrop("Jefepassives_ChronoBeacons")
 end
 
 function mod:load(options, version)
-	if not isOptionEnabled(options, "fullChronoBeacons") and
+	if isOptionEnabled(options, "fullChronoBeacons") and
             not isMemhackAvailableAndEnabled() then
 		showChronoMemhackWarning()
 		LOG("Jefepassives: Memhack is not enabled. Chrono Beacons will use its reduced effect only.")

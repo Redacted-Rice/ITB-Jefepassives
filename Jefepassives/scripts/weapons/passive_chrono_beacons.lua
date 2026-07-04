@@ -200,6 +200,7 @@ function Jefepassives_ChronoBeacons:GetSkillEffect(p1, p2)
 			Board:Ping(p, GL_Color(255, 50, 50))]])
 	effect:AddDelay(2)
 	effect:AddDamage(SpaceDamage(target, damage))
+	effect:AddDelay(2)
 	return effect
 end
 
@@ -329,11 +330,13 @@ end
 
 function Jefepassives_ChronoBeacons:init(fullChronoBeacons)
 	if fullChronoBeacons then
+		LOG("Full version of Chrono Beacons initialized")
 		Jefepassives_ChronoBeacons_A = Jefepassives_ChronoBeacons:new{
 			UpgradeDescription = "After deployment, a chrono debris fragment strikes the weakest Vek for 2 damage.",
 			Overcharged = true,
 		}
 	else
+		LOG("Non memhack version of Chrono Beacons initialized")
 		Jefepassives_ChronoBeacons.PowerCost = 1
 		Jefepassives_ChronoBeacons.Upgrades = 0
 		Jefepassives_ChronoBeacons.Overcharged = true

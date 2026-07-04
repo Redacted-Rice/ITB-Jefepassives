@@ -218,7 +218,10 @@ function Jefepassives_ChronoBeacons:getVekPriorityTier(pawn)
 	if pawnTypeUtils.isSpawnCategory(pawn, "Unique") then
 		return 1
 	end
-	return 0
+	if pawnTypeUtils.isSpawnCategory(pawn, "Core") then
+		return 0
+	end
+	return -1
 end
 
 local function isStrongerVekTarget(tier, health, pawnId, bestTier, bestHealth, bestId)

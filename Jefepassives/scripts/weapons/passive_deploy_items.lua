@@ -37,7 +37,7 @@ Maybe I should wait a bit before doing this? Maybe first player turn?
 
 ]]
 
-Jefepassives_DeployItems_Passive = PassiveSkill:new{
+Jefepassives_DeployItems = PassiveSkill:new{
 	--Infos
 	Name = "Mines Dispenser",
 	Description = [[At the start mission deploy 3 "Items" on random empty tiles.]].."\n"..[[These "Items" are Repair Platforms, but can also be Mines with upgrades.]],
@@ -50,7 +50,7 @@ Jefepassives_DeployItems_Passive = PassiveSkill:new{
 	UpgradeList = { "Freeze Mines", "Old Earth Mines" },
 
 	--Passive
-	Passive = "Jefepassives_DeployItems_Passive",
+	Passive = "Jefepassives_DeployItems",
 
 	--Tip image
 	TipRepairMineSpawns = { Point(1, 2), Point(3, 2), Point(0, 2), },
@@ -62,7 +62,7 @@ Jefepassives_DeployItems_Passive = PassiveSkill:new{
 	}
 }
 
-function Jefepassives_DeployItems_Passive:GetSkillEffect(p1, p2)
+function Jefepassives_DeployItems:GetSkillEffect(p1, p2)
 	local ret = SkillEffect()
 
 	--"Item_Repair_Mine", "Freeze_Mine", "Item_Mine"
@@ -88,25 +88,25 @@ function Jefepassives_DeployItems_Passive:GetSkillEffect(p1, p2)
 end
 
 
-Jefepassives_DeployItems_Passive_A = Jefepassives_DeployItems_Passive:new{
+Jefepassives_DeployItems_A = Jefepassives_DeployItems:new{
 	UpgradeDescription = "Add Freeze Mines to the pool.\nAlso deploy one additional item at the start of the mission.",
 	TipRepairMineSpawns = { Point(1, 2), Point(3, 2) },
 	TipFreezeMineSpawns = { Point(0, 2), Point(2, 1) },
-	Passive = "Jefepassives_DeployItems_Passive_A",
+	Passive = "Jefepassives_DeployItems_A",
 }
 
-Jefepassives_DeployItems_Passive_B = Jefepassives_DeployItems_Passive:new{
+Jefepassives_DeployItems_B = Jefepassives_DeployItems:new{
 	UpgradeDescription = "Add Old Earth Mines to the pool.\nAlso deploy one additional item at the start of the mission.",
 	TipRepairMineSpawns = { Point(1, 2), Point(3, 2) },
 	TipExplosMineSpawns = { Point(0, 2), Point(2, 1) },
-	Passive = "Jefepassives_DeployItems_Passive_B",
+	Passive = "Jefepassives_DeployItems_B",
 }
 
-Jefepassives_DeployItems_Passive_AB = Jefepassives_DeployItems_Passive:new{
+Jefepassives_DeployItems_AB = Jefepassives_DeployItems:new{
 	TipRepairMineSpawns = { Point(1, 2), Point(3, 2) },
 	TipFreezeMineSpawns = { Point(0, 2) },
 	TipExplosMineSpawns = { Point(2, 1) },
-	Passive = "Jefepassives_DeployItems_Passive_AB",
+	Passive = "Jefepassives_DeployItems_AB",
 }
 
 local DEFAULT_DEPLOYMENT_ZONE = {}
@@ -132,28 +132,26 @@ local function isInsideDeployZone(point)
 	return false
 end
 
+local function isInsidePylonZone(point)
+	for _, pos in ipairs(extract_table(Board:GetZone("pylons"))) do
+		if pos == point then
+			--LOG("point: "..point:GetString().." is inside pylon zone!")
+			return true
+		end
+	end
+	return false
+end
+
 local function getRandomPos()
 	local list = {}
 
 	for j = 0, 7 do
 		for i = 0, 7 do
 			local curr = Point(i, j)
-			--[[TODO: maybe also check:
-				and not Board:IsDangerous(curr)
-				and not Board:IsDangerousItem(curr)
-				and not Board:IsSpawning(curr)
-
-				--unnecessary with not Board:IsItem(curr)
-				and not Board:IsPod(curr)
-				and (Board:GetItem(curr) == nil or Board:GetItem(curr) == "")
-
-				and not Board:GetTerrain(curr) ~= TERRAIN_WATER then --what about lava?
-
-				and not Board:IsEnvironmentDanger(curr)
-			]]
-
 			if not Board:IsBlocked(curr, PATH_PROJECTILE)
+					and not isInsidePylonZone(curr)
 					and not Board:IsItem(curr)
+					and not Board:IsPod(curr)
 					and (Board:GetTerrain(curr) == TERRAIN_ROAD or Board:GetTerrain(curr) == TERRAIN_FOREST or Board:GetTerrain(curr) == TERRAIN_SAND) 
 					and not Board:IsFire(curr)
 					and not Board:IsEdge(curr) --exclude edge tiles?
@@ -181,47 +179,34 @@ end
 BoardEvents.onTerrainChanged:subscribe(function(p, terrain, terrain_prev)
 	local item = Board:GetItem(p)
 	if item ~= nil and item ~= "" and isDeployItem(item) then
-		--LOG("isDeployItem(item: "..item..") -> YES!")
 		if terrain == TERRAIN_HOLE or terrain == TERRAIN_WATER then
 			Board:RemoveItem(p)
 		end
 	end
 end)
 
-
 local function createMines()
 	local itemAmount = 0
 	local items = {}
 
-	if IsPassiveSkill("Jefepassives_DeployItems_Passive_AB") then --Archive Mines + Freeze Mines
+	if IsPassiveSkill("Jefepassives_DeployItems_AB") then --Archive Mines + Freeze Mines
 		items = { "Item_Repair_Mine", "Freeze_Mine", "Item_Mine" }
 		itemAmount = 5
 
-	elseif IsPassiveSkill("Jefepassives_DeployItems_Passive_A") then --Freeze Mines
+	elseif IsPassiveSkill("Jefepassives_DeployItems_A") then --Freeze Mines
 		items = { "Item_Repair_Mine", "Freeze_Mine" }
 		itemAmount = 4
 
-	elseif IsPassiveSkill("Jefepassives_DeployItems_Passive_B") then --Archive Mines
+	elseif IsPassiveSkill("Jefepassives_DeployItems_B") then --Archive Mines
 		items = { "Item_Repair_Mine", "Item_Mine" }
 		itemAmount = 4
 
-	elseif IsPassiveSkill("Jefepassives_DeployItems_Passive") then
+	elseif IsPassiveSkill("Jefepassives_DeployItems") then
 		items = { "Item_Repair_Mine" }
 		itemAmount = 3
 	else
 		return
 	end
-
-	--itemAmount = 40 --just for the tests
-	--items = { "Item_Mine" }
-
-	--[[
-	if amount == 0 then
-		return
-	end
-	]]
-
-	--LOG("----------------- #items: "..tostring(#items))
 
 	--Loop
 	for i = 1, itemAmount do
@@ -233,7 +218,7 @@ local function createMines()
 			break --could even be return
 		else
 			--TODO: create an anim. Or maybe a board alert.
-			Board:AddAlert(pos, "DEPLOYED") --not showing up?
+			--Board:AddAlert(pos, "DEPLOYED")
 			--ret:AddReverseAirstrike(p2, "effects/tif_biplane.png")
 			Board:SetItem(pos, item)
 		end
@@ -241,12 +226,20 @@ local function createMines()
 end
 
 local EVENT_onMissionStart = function(mission)
-	createMines()
+	firstEnemyTurn = true
 end
 
 local EVENT_onMissionNextPhaseCreated = function(prevMission, nextMission)
-	createMines()
+	firstEnemyTurn = true
+end
+
+local EVENT_onNextTurn = function(mission)
+	if Game:GetTeamTurn() == TEAM_ENEMY and firstEnemyTurn then
+		createMines()
+		firstEnemyTurn = false
+	end
 end
 
 modApi.events.onMissionStart:subscribe(EVENT_onMissionStart)
 modApi.events.onMissionNextPhaseCreated:subscribe(EVENT_onMissionNextPhaseCreated)
+modApi.events.onNextTurn:subscribe(EVENT_onNextTurn)

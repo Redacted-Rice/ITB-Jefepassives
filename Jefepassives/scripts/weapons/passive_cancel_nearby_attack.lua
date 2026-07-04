@@ -3,15 +3,15 @@ Idea: Generic
 Code: Truelch
 ]]
 
-Jefepassives_CancelNearbyAttacks_Passive = PassiveSkill:new{
+Jefepassives_CancelNearbyAttacks = PassiveSkill:new{
 	--Infos
 	Name = "Intimidating presence",
 	Description = "At the end of player's turn, Mechs cancel attacks of nearby enemies with fewer HP.",
-	PowerCost = 1,
+	PowerCost = 1, --maybe even 2??
 	Icon = "weapons/passives/passive_cancel_nearby_attack.png",
 
 	--Passive
-	Passive = "Jefepassives_CancelNearbyAttacks_Passive",
+	Passive = "Jefepassives_CancelNearbyAttacks",
 
 	--Tip image
 	TipImage = {
@@ -22,9 +22,8 @@ Jefepassives_CancelNearbyAttacks_Passive = PassiveSkill:new{
 	}
 }
 
-function Jefepassives_CancelNearbyAttacks_Passive:GetSkillEffect(p1, p2)
+function Jefepassives_CancelNearbyAttacks:GetSkillEffect(p1, p2)
 	local ret = SkillEffect()
-	--ret.piOrigin = Point(2, 3)
 
 	local damage = SpaceDamage(0)
 	damage.bHide = true
@@ -44,9 +43,7 @@ end
 
 
 local EVENT_onPreEnvironment = function(mission)
-	if not IsPassiveSkill("Jefepassives_CancelNearbyAttacks_Passive") then
-		return
-	end
+	if not IsPassiveSkill("Jefepassives_CancelNearbyAttacks") then return end
 
 	for j = 0, 7 do
 		for i = 0, 7 do

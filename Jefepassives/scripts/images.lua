@@ -5,6 +5,7 @@ local resourcePath = mod.resourcePath
 modApi:appendAsset("img/weapons/passives/passive_acid_rain.png",            resourcePath.."img/weapons/passives/passive_acid_rain.png")
 modApi:appendAsset("img/weapons/passives/passive_aligned_radar.png",        resourcePath.."img/weapons/passives/passive_aligned_radar.png")
 modApi:appendAsset("img/weapons/passives/passive_cancel_nearby_attack.png", resourcePath.."img/weapons/passives/passive_cancel_nearby_attack.png")
+modApi:appendAsset("img/weapons/passives/passive_chrono_homing.png",        resourcePath.."img/weapons/passives/passive_chrono_homing.png")
 modApi:appendAsset("img/weapons/passives/passive_deploy_items.png",         resourcePath.."img/weapons/passives/passive_deploy_items.png")
 modApi:appendAsset("img/weapons/passives/passive_mark_random.png",          resourcePath.."img/weapons/passives/passive_mark_random.png")
 modApi:appendAsset("img/weapons/passives/passive_materia.png",              resourcePath.."img/weapons/passives/passive_materia.png")
@@ -22,5 +23,6 @@ modApi:appendAsset("img/units/passive/fake_building2_a.png",        resourcePath
 modApi:appendAsset("img/units/passive/fake_building2_standing.png", resourcePath .."img/units/passive/fake_building2_standing.png")
 modApi:appendAsset("img/units/passive/pawn_rebound.png",            resourcePath .."img/units/passive/pawn_rebound.png")
 
+modApi:appendAsset("img/effects/chrono_debris.png",          resourcePath .."img/effects/chrono_debris.png")
 modApi:appendAsset("img/effects/flying_duck.png",            resourcePath .."img/effects/flying_duck.png")
 modApi:appendAsset("img/weapons/weapons/weapon_rebound.png", resourcePath.."img/weapons/weapons/weapon_rebound.png")

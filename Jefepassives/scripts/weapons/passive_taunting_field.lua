@@ -1,4 +1,3 @@
-
 --[[
 Weird, I think I managed to taunt a Gastropod while being an obstacle, which made it target an objective :(
 
@@ -49,7 +48,7 @@ Jefepassives_TauntingField = PassiveSkill:new{
 	}
 }
 
-local function computeTaunt()
+local function computeTaunt2()
 	if not IsPassiveSkill("Jefepassives_TauntingField") then return end
 
 	--I really need to remember how to just pick the enemy list...
@@ -63,7 +62,7 @@ local function computeTaunt()
 					if mech ~= nil and taunt.canBeTauntedByPoint(enemy, mech:GetSpace(), true) then
 						local effect = SkillEffect()
 						taunt.addTauntEffectEnemy(effect, enemy:GetId(), mech:GetSpace(), 0, false)
-						LOG("enemy: "..enemy:GetType().." ("..enemy:GetSpace():GetString()..") was taunted by mech: "..mech:GetType().." ("..mech:GetSpace():GetString()..")")
+						--LOG("enemy: "..enemy:GetType().." ("..enemy:GetSpace():GetString()..") was taunted by mech: "..mech:GetType().." ("..mech:GetSpace():GetString()..")")
 						Board:AddEffect(effect)
 						Board:AddAlert(enemy:GetSpace(), "TAUNTED")
 						break --we don't want the pawn to be taunted by multiple mechs at the same time lol
@@ -74,9 +73,22 @@ local function computeTaunt()
 	end
 end
 
+--[[
+--Doesn't solve the issue
+local function computeTaunt()
+	if IsPassiveSkill("Jefepassives_RandomSwap") then
+		modApi:scheduleHook(550, function()
+			computeTaunt2()
+		end)
+	else
+		computeTaunt2()
+	end
+end
+]]
+
 local EVENT_onNextTurn = function(mission)
 	if Game:GetTeamTurn() == TEAM_PLAYER then
-		computeTaunt()
+		computeTaunt2()	
 	end
 end
 modApi.events.onNextTurn:subscribe(EVENT_onNextTurn)
@@ -84,7 +96,7 @@ modApi.events.onNextTurn:subscribe(EVENT_onNextTurn)
 
 local EVENT_onResetTurn = function(mission)
 	modApi:scheduleHook(550, function() --TODO: change that into an appropriate conditional hook
-		computeTaunt()
+		computeTaunt2()
 	end)
 end
 modapiext.events.onResetTurn:subscribe(EVENT_onResetTurn)

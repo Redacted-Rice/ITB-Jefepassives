@@ -42,7 +42,10 @@ function Jefepassives_Waterfall:GetSkillEffect(p1, p2)
 	local ret = SkillEffect()
 
 	ret:AddScript([[
-		Board:SetWeather(5, RAIN_WATER, Point(2, 2), Point(1, 1), 2)
+		local damage = SpaceDamage(Point(2, 2), 0)
+		damage.sAnimation = "Splash"
+		Board:AddEffect(damage)
+		Board:SetWeather(5, RAIN_NORMAL, Point(2, 2), Point(1, 1), 2)
 		Board:SetTerrain(Point(2, 2), TERRAIN_WATER)
 		Board:AddAlert(Point(2, 2), "Water-forming")
 	]])
@@ -81,6 +84,7 @@ local function isTrainTrack(point)
 end
 ]]
 
+--for j = 0, 7 do for i = 0, 7 do if Board:IsSpawning(Point(i, j)) then LOG("Spawning at: "..Point(i, j):GetString()) end end end
 local function getRandomPos(points)
 	local list = {}
 
@@ -108,6 +112,7 @@ local function getRandomPos(points)
 				--and not isTrainTrack(curr)
 				and (Board:GetCustomTile(curr) == nil or Board:GetCustomTile(curr) == "")
 				and not list_contains(points, curr) --this should fix the fact that I got twice the same point
+				and not Board:IsSpawning(curr)
 				then
 					list[#list + 1] = curr
 			end
@@ -124,35 +129,33 @@ local function getRandomPos(points)
 end
 
 local function computeWaterSpawns()
-	LOG("computeWaterSpawns - A")
-
 	local m = GetCurrentMission()
 
 	if m == nil or m.passive_water_spawns == nil then
-		LOG("m == nil or m.passive_water_spawns == nil")
+		--LOG("m == nil or m.passive_water_spawns == nil")
 		return
 	end
 
 	local effect = SkillEffect()
 	for _, pos in ipairs(m.passive_water_spawns) do
-		LOG(" -> computeWaterSpawns -> loop - A")
 
 		if pos == nil then
-			LOG(" -> computeWaterSpawns -> loop -> pos is nil!")
+			--LOG(" -> computeWaterSpawns -> loop -> pos is nil!")
 		end
+
+		local damage = SpaceDamage(pos, 0)
+		damage.sAnimation = "Splash"
+		effect:AddDamage(damage)
 
 		effect:AddScript([[
 			Board:SetWeather(5, RAIN_NORMAL, ]]..pos:GetString()..[[, Point(1, 1), 2)
 			Board:SetTerrain(]]..pos:GetString()..[[, TERRAIN_WATER)
 			Board:AddAlert(]]..pos:GetString()..[[, "Water-forming")]])
 		effect:AddSound("/props/tide_flood")
-		effect:AddBounce(pos, -6)
+		effect:AddBounce(pos, 6) --was -6
 		effect:AddDelay(2)
-		LOG(" -> computeWaterSpawns -> loop - B")
 	end
-	LOG("computeWaterSpawns - B")
 	Board:AddEffect(effect)
-	LOG("computeWaterSpawns - C")
 end
 
 local EVENT_onNextTurn = function(mission)
@@ -197,8 +200,8 @@ local EVENT_onResetTurn = function(mission)
 		local m = GetCurrentMission()
 		--if mission ~= nil and mission.passive_water_spawns ~= nil then
 		if m ~= nil and m.passive_water_spawns ~= nil then
-			LOG("EVENT_onResetTurn -> mission.passive_water_spawns: "..tostring(#mission.passive_water_spawns))
-			LOG("EVENT_onResetTurn -> m.passive_water_spawns: "..tostring(#m.passive_water_spawns))
+			--LOG("EVENT_onResetTurn -> mission.passive_water_spawns: "..tostring(#mission.passive_water_spawns))
+			--LOG("EVENT_onResetTurn -> m.passive_water_spawns: "..tostring(#m.passive_water_spawns))
 			--computeWaterSpawns(mission.passive_water_spawns)
 			computeWaterSpawns(m.passive_water_spawns)
 		end

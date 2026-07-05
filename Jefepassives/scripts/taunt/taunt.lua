@@ -299,6 +299,11 @@ function taunt.canBeTauntedByPoint(pawn, point, mustBeAbleToHit)
 	if target == Point(-1, -1) or target == space then
 		return false
 	end -- The enemy has a target, the target doesn't equal the current space trying to be taunted, and the target is attacking its own space (digger, scorp leader, etc.)
+
+	if target == point then
+		if SHOW_LOGS then LOG(">>>>>>>>>>>>> No need to taunt the same position! It'll prevent web to be broken") end
+		return false
+	end
 	
 	if SHOW_LOGS then LOG("canBeTauntedByPoint ---> return canTargetNewPoint") end
 

@@ -26,7 +26,9 @@ local function isMemhackAvailableAndEnabled()
 			settingData and settingData.enabled
 end
 
+local warningShown = false
 local function showChronoMemhackWarning()
+	if warningShown then return end
 	modApi:scheduleHook(50, function()
 		sdlext.showInfoDialog(
 			"Requirement Warning",
@@ -43,6 +45,7 @@ local function showChronoMemhackWarning()
 			}
 		)
 	end)
+	warningShown = true
 end
 
 function mod:metadata()

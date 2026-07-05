@@ -58,7 +58,7 @@ function Jefepassives_RandomSwap:GetSkillEffect(p1, p2)
 	return ret
 end
 
-local function swap(pawnId1, pawnId2)
+local function swap2(pawnId1, pawnId2)
 
 	local enemy1 = Board:GetPawn(pawnId1)
 	local enemy2 = Board:GetPawn(pawnId2)
@@ -72,7 +72,7 @@ local function swap(pawnId1, pawnId2)
 	local p2 = enemy2:GetSpace()
 
 	local delay = Board:IsPawnSpace(p2) and 0 or FULL_DELAY --TODO: simplify this
-	LOG("Jefepassives_RandomSwap -> delay: "..tostring(delay))
+	--LOG("Jefepassives_RandomSwap -> delay: "..tostring(delay))
 
 	local effect = SkillEffect()
 
@@ -88,6 +88,20 @@ local function swap(pawnId1, pawnId2)
 
 	Board:AddEffect(effect)
 end
+
+
+local function swap(pawnId1, pawnId2)
+	if IsPassiveSkill("Jefepassives_TauntingField") then
+		modApi:scheduleHook(550, function()
+			swap2(pawnId1, pawnId2)
+		end)
+	else
+		swap2(pawnId1, pawnId2)
+	end
+end
+
+
+
 
 local EVENT_onNextTurn = function(mission)
 	if Game:GetTeamTurn() == TEAM_PLAYER and IsPassiveSkill("Jefepassives_RandomSwap") then

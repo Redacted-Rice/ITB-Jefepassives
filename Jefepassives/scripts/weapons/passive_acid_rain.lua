@@ -212,13 +212,11 @@ end
 modapiext.events.onResetTurn:subscribe(EVENT_onResetTurn)
 
 local HOOK_onPawnIsAcid = function(mission, pawn, isAcid)
-	--IsPassiveSkill("jefepassives_AcidRain_Passive_B") should work for both _B and _AB but for some reason, it's false for _AB
 	local isHeal  = IsPassiveSkill("Jefepassives_AcidRain_A") or IsPassiveSkill("Jefepassives_AcidRain_AB")
 	local isBoost = IsPassiveSkill("Jefepassives_AcidRain_B") or IsPassiveSkill("Jefepassives_AcidRain_AB")
 
 	--[[
 	LOG(">>>>>>>>>> HOOK_onPawnIsAcid -> isHeal: "..tostring(isHeal)..", isBoost: "..tostring(isBoost))
-
 	LOG("-> is jefepassives_AcidRain   : "..tostring(IsPassiveSkill("Jefepassives_AcidRain"   )))
 	LOG("-> is jefepassives_AcidRain_A : "..tostring(IsPassiveSkill("Jefepassives_AcidRain_A" )))
 	LOG("-> is jefepassives_AcidRain_B : "..tostring(IsPassiveSkill("Jefepassives_AcidRain_B" ))) --this was false with _AB, wtf
@@ -227,16 +225,17 @@ local HOOK_onPawnIsAcid = function(mission, pawn, isAcid)
 
 	local m = GetCurrentMission()
 	if m == nil then
-		--LOG("mission is nil, WTF!")
+		LOG("mission is nil, WTF!")
 		return
 	end
 
 	if not isHeal and not isBoost then
+		LOG("not isHeal and not isBoost -> RETURN")
 		return
 	end
 
 	--I can't recall if someone made a mod with enemy mechs, better be safe...
-	if isHeal and pawn:IsMech() and not pawn:IsEnemy() then
+	if pawn:IsMech() and not pawn:IsEnemy() then
 		--LOG("HOOK_onPawnIsAcid -> HEAL")
 
 		-- CONDITIONAL HOOK --
@@ -266,11 +265,13 @@ local HOOK_onPawnIsAcid = function(mission, pawn, isAcid)
 					--LOG(" > Is no longer acid!") --> NO heal
 				end
 
+				--[[
 				if oldPos == pawn:GetSpace() then --this fix doesn't work, acid isn't triggered twice when I do this verification
-					--LOG(" > Hasn't moved -> heal") --> heal
+					LOG(" > Hasn't moved -> heal") --> heal
 				else
-					--LOG(" > Has moved -> NO heal") --> NO heal
+					LOG(" > Has moved -> NO heal") --> NO heal
 				end
+				]]
 
 				if doHeal then
 					local heal = SpaceDamage(pawn:GetSpace(), -1)

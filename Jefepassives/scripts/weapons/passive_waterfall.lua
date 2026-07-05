@@ -23,7 +23,7 @@ Should it be possible to target:
 
 Jefepassives_Waterfall = PassiveSkill:new{
 	--Infos
-	Name = "Water-former",
+	Name = "Water-Former",
 	Description = "At the start of your turn, change 2 unoccupied tiles into water.",
 	PowerCost = 0,
 	Icon = "weapons/passives/passive_waterfall.png",

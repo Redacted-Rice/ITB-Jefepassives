@@ -1,4 +1,4 @@
-Jefepassives_SpikyCleats_Passive = PassiveSkill:new{
+Jefepassives_SpikyCleats = PassiveSkill:new{
 	Name = "Concussors",
 	Description = "Blocking a spawn causes the underground Vek to lose health.",
 	PowerCost = 1,
@@ -7,14 +7,14 @@ Jefepassives_SpikyCleats_Passive = PassiveSkill:new{
 	Pawn = "Scorpion1",
 	UpgradeCost = {2},
 	UpgradeList = { "+1 Damage" },
-	Passive = "Jefepassives_SpikyCleats_Passive",
+	Passive = "Jefepassives_SpikyCleats",
 	TipImage = {
 		Unit = Point (2,2),
 		CustomPawn = "PunchMech",
         	Target = Point(2,2),
 	}
 }
-function Jefepassives_SpikyCleats_Passive:GetSkillEffect(p1,p2)
+function Jefepassives_SpikyCleats:GetSkillEffect(p1,p2)
 	local ret = SkillEffect()
 	local point = Point(3,2)
 	local damage = SpaceDamage(point,0)
@@ -28,16 +28,16 @@ function Jefepassives_SpikyCleats_Passive:GetSkillEffect(p1,p2)
 	ret:AddMelee(Point(2,2),damage)
 	return ret
 end
-Jefepassives_SpikyCleats_Passive_A = Jefepassives_SpikyCleats_Passive:new{
+Jefepassives_SpikyCleats_A = Jefepassives_SpikyCleats:new{
 	UpgradeDescription = "Deals one additional damage each time.",
-	Passive = "Jefepassives_SpikyCleats_Passive_A",
+	Passive = "Jefepassives_SpikyCleats_A",
 	Pawn = "Beetle1",
 }
 
 local function EVENT_VekSpawnRemoved(mission, spawnData)
-	if IsPassiveSkill("Jefepassives_SpikyCleats_Passive") then
+	if IsPassiveSkill("Jefepassives_SpikyCleats") then
 	local dmg = 1
-	if IsPassiveSkill("Jefepassives_SpikyCleats_Passive_A") then
+	if IsPassiveSkill("Jefepassives_SpikyCleats_A") then
 		dmg = 2
 	end
 		local point = spawnData.location
@@ -66,7 +66,7 @@ for i,v in pairs(Mission) do
             if not list_contains(_G["EXCL"], i) then 
                 if i == "IsEnvironmentEffect" then
 					local spawn_remover = false
-						if IsPassiveSkill("Jefepassives_SpikyCleats_Passive") then
+						if IsPassiveSkill("Jefepassives_SpikyCleats") then
 							spawn_remover = true
 						end
 					if spawn_remover then
@@ -84,7 +84,7 @@ local function EVENT_MissionUpdate(mission)
 	local spawn_remover = false
 	if mission.ID == "Mission_Test" then return end
 	for i = 0,2 do
-		if IsPassiveSkill("Jefepassives_SpikyCleats_Passive") then
+		if IsPassiveSkill("Jefepassives_SpikyCleats") then
 			spawn_remover = true
 		end
 	end
@@ -127,9 +127,9 @@ local function EVENT_MissionUpdate(mission)
 			end
 		end
 		--crack blocked spawn
-			if IsPassiveSkill("Jefepassives_SpikyCleats_Passive") then
+			if IsPassiveSkill("Jefepassives_SpikyCleats") then
 	local dmg = 1
-	if IsPassiveSkill("Jefepassives_SpikyCleats_Passive_A") then
+	if IsPassiveSkill("Jefepassives_SpikyCleats_A") then
 		dmg = 2
 	end
 				local point = mission.BlockedSpawnList[mission.DestabilizeCounter]

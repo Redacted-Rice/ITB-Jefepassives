@@ -5,7 +5,7 @@ Code: Truelch
 
 Jefepassives_CancelNearbyAttacks = PassiveSkill:new{
 	--Infos
-	Name = "Intimidating presence",
+	Name = "Intimidating Presence",
 	Description = "At the end of player's turn, Mechs cancel attacks of nearby enemies with fewer HP.",
 	PowerCost = 1, --maybe even 2??
 	Icon = "weapons/passives/passive_cancel_nearby_attack.png",

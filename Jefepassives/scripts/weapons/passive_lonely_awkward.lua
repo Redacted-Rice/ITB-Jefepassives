@@ -29,13 +29,13 @@ ANIMS.Jefepassives_Social_Anxiety = Animation:new{
 
 
 -- loneliness
-Jefepassives_Loneliness_Passive = PassiveSkill:new{
+Jefepassives_Loneliness = PassiveSkill:new{
 	Name = "Loneliness Amplifier",
 	Description = "Vek take emotional damage if ending turn with no adjacent units.",
 	PowerCost = 2,
 	Icon = "weapons/passives/Jefepassives_passive_loneliness.png",
 	Upgrades = 0,
-	Passive = "Jefepassives_Loneliness_Passive",
+	Passive = "Jefepassives_Loneliness",
 	TipImage = {
 		Unit = Point(1,3),
 		CustomPawn = "PunchMech",
@@ -46,7 +46,7 @@ Jefepassives_Loneliness_Passive = PassiveSkill:new{
 	}
 }
 
-function Jefepassives_Loneliness_Passive:GetSkillEffect(p1,p2)
+function Jefepassives_Loneliness:GetSkillEffect(p1,p2)
 	local ret = SkillEffect()
 	local dir = GetDirection(p2 - p1)
 	local dano = SpaceDamage(Point(3,1),1)
@@ -56,13 +56,13 @@ function Jefepassives_Loneliness_Passive:GetSkillEffect(p1,p2)
 end
 
 -- awkwardness
-Jefepassives_Awkwardness_Passive = PassiveSkill:new{
+Jefepassives_Awkwardness = PassiveSkill:new{
 	Name = "Awkwardness Inducer",
 	Description = "Vek take social anxiety damage if ending turn adjacent to other units.",
 	PowerCost = 2,
 	Icon = "weapons/passives/Jefepassives_passive_awkwardness.png",
 	Upgrades = 0,
-	Passive = "Jefepassives_Awkwardness_Passive",
+	Passive = "Jefepassives_Awkwardness",
 	TipImage = {
 		Unit = Point(1,3),
 		CustomPawn = "PunchMech",
@@ -73,7 +73,7 @@ Jefepassives_Awkwardness_Passive = PassiveSkill:new{
 	}
 }
 
-function Jefepassives_Awkwardness_Passive:GetSkillEffect(p1,p2)
+function Jefepassives_Awkwardness:GetSkillEffect(p1,p2)
 	local ret = SkillEffect()
 	local dir = GetDirection(p2 - p1)
 	local dano = SpaceDamage(Point(2,3),1)
@@ -84,8 +84,8 @@ end
 
 -- events
 local function applyDamage(fx)
-	local Awkwardness = IsPassiveSkill("Jefepassives_Awkwardness_Passive")
-	local loneliness = IsPassiveSkill("Jefepassives_Loneliness_Passive")
+	local Awkwardness = IsPassiveSkill("Jefepassives_Awkwardness")
+	local loneliness = IsPassiveSkill("Jefepassives_Loneliness")
 	if (Game:GetTeamTurn() == TEAM_ENEMY or fx) and Board:GetTurn() > 0 and (Awkwardness or loneliness) then
 		local effect = SkillEffect()
 		local delay = fx and 0.5 or 1

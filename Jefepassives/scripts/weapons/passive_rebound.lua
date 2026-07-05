@@ -37,7 +37,7 @@ Jefepassives_Rebound_Pawn_AB = Jefepassives_Rebound_Pawn:new {
 	SkillList = { "Jefepassives_Rebound_Weapon_AB" },
 }
 
-Jefepassives_Rebound_Passive = PassiveSkill:new{
+Jefepassives_Rebound = PassiveSkill:new{
 	Name = "Rebound Satellite",
 	Description = "At mission start, summon an Orbital Unit which can rebound pushing artilleries off allied units.",
 	PowerCost = 2,
@@ -46,7 +46,7 @@ Jefepassives_Rebound_Passive = PassiveSkill:new{
 	uDamage = 0,
 	UpgradeCost = {2,2},
 	UpgradeList = { "+1 Range","+1 Damage" },
-	Passive = "Jefepassives_Rebound_Passive",
+	Passive = "Jefepassives_Rebound",
 	Point = Point(2,1),
 	TipImage = {
 		Unit = Point (2,3),
@@ -54,7 +54,7 @@ Jefepassives_Rebound_Passive = PassiveSkill:new{
         	Enemy = Point(2,1),
 	}
 }
-function Jefepassives_Rebound_Passive:GetSkillEffect(p1,p2)
+function Jefepassives_Rebound:GetSkillEffect(p1,p2)
 	local ret = SkillEffect()
 	local fx = SpaceDamage(p1, 0)
 	fx.sAnimation = "ExploRaining1"
@@ -70,7 +70,7 @@ function Jefepassives_Rebound_Passive:GetSkillEffect(p1,p2)
 	return ret
 end
 
-Jefepassives_Rebound_Passive_A = Jefepassives_Rebound_Passive:new{
+Jefepassives_Rebound_A = Jefepassives_Rebound:new{
 	UpgradeDescription = "Increases the artillery's range by one.",
 	Point = Point(2,0),
 	TipImage = {
@@ -78,15 +78,15 @@ Jefepassives_Rebound_Passive_A = Jefepassives_Rebound_Passive:new{
         	Target = Point(2,2),
         	Enemy = Point(2,0),
 	},
-	Passive = "Jefepassives_Rebound_Passive_A",
+	Passive = "Jefepassives_Rebound_A",
 }
-Jefepassives_Rebound_Passive_B = Jefepassives_Rebound_Passive:new{
+Jefepassives_Rebound_B = Jefepassives_Rebound:new{
 	UpgradeDescription = "Increases the artillery's damage by one.",
-	Passive = "Jefepassives_Rebound_Passive_B",
+	Passive = "Jefepassives_Rebound_B",
 	uDamage = 1
 }
-Jefepassives_Rebound_Passive_AB = Jefepassives_Rebound_Passive_A:new{
-	Passive = "Jefepassives_Rebound_Passive_AB",
+Jefepassives_Rebound_AB = Jefepassives_Rebound_A:new{
+	Passive = "Jefepassives_Rebound_AB",
 	uDamage = 1
 }
 
@@ -205,7 +205,7 @@ Jefepassives_Rebound_Weapon_AB = Jefepassives_Rebound_Weapon_A:new{
 
 
 local function EVENT_MissionStart(mission)
-		local passive = "Jefepassives_Rebound_Passive"
+		local passive = "Jefepassives_Rebound"
 		local words = {"_A","_B","_AB"}
 		if IsPassiveSkill(passive) then
 			local level = ""
@@ -239,7 +239,7 @@ end
 local function EVENT_MissionNextPhaseCreated(prevMission, nextMission)
 	modApi:scheduleHook(100, function()
 		if Board then
-			local passive = "Jefepassives_Rebound_Passive"
+			local passive = "Jefepassives_Rebound"
 			local words = {"_A","_B","_AB"}
 			if IsPassiveSkill(passive) then
 				local level = ""

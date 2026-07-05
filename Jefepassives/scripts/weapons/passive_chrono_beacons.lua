@@ -131,7 +131,7 @@ end
 Jefepassives_ChronoBeacons = PassiveSkill:new{
 	Name = "Chrono Beacons",
 	Description = "Time Pods targets the strongest Vek on the board.",
-	PowerCost = 0,
+	PowerCost = 1,
 	Icon = "weapons/passives/passive_chrono_homing.png",
 	Passive = "Jefepassives_ChronoBeacons",
 	Upgrades = 1,
@@ -340,7 +340,6 @@ function Jefepassives_ChronoBeacons:init(fullChronoBeacons)
 		}
 	else
 		LOG("Non memhack version of Chrono Beacons initialized")
-		Jefepassives_ChronoBeacons.PowerCost = 1
 		Jefepassives_ChronoBeacons.Upgrades = 0
 		Jefepassives_ChronoBeacons.Overcharged = true
 		Jefepassives_ChronoBeacons.Description =

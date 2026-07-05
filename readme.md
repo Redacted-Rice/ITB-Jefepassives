@@ -2,6 +2,12 @@
 
 A community collection of passive weapons made for our YouTuber Jefepato!
 
+These can be individually enabled/disabled via the standard mod loader weapon deck modification system.
+
+If you want to try them out now, the weapon ids are in this readme and you can give them to yourself in the console with `weapon <id>`
+
+Enjoy!
+
 ## Contributors
 
 * Generic
@@ -18,19 +24,25 @@ Place the `Jefepassives` folder in `Into the Breach/mods/`. When you open the fo
 
 - ModLoader 2.9.5+
 - ModLoaderExt 1.24+
+- EasyEdit 2.0.8+
 
 ## Passives
 
-| Name | Author | Weapon ID | Description |
-|------|--------|-----------|-------------|
-| A.C.I.D. Rain | Truelch | `Jefepassives_AcidRain_Passive` | At the start of every turn, create an A.C.I.D. pool randomly on the map. |
-| Concussors | TheBoardsCousin | `Jefepassives_SpikyCleats_Passive` | Blocking a spawn causes the underground Vek to lose health. |
-| Experimental Swapper | Truelch | `Jefepassives_RandomSwap_Passive` | At the start of player's turn, swap two random enemies. |
-| Intimidating presence | Truelch | `Jefepassives_CancelNearbyAttacks_Passive` | At the end of player's turn, Mechs cancel attacks of nearby enemies with fewer HP. |
-| Materia Nanobots | TheBoardsCousin | `Jefepassives_Materia_Passive` | Mechs are Boosted when they destroy a mountain. |
-| Migratory Evoker | Das Keifer | `Jefepassives_MigratoryEvoker` | At the start of the Vek turn, each Vek attempts to move one tile to the right. |
-| Mines Dispenser | Truelch | `jefepassives_DeployItems_Passive` | At the start mission deploy 3 "Items" on random empty tiles.<br>These "Items" are Repair Platforms, but can also be Mines with upgrades. |
-| Rebound Satellite | TheBoardsCousin | `Jefepassives_Rebound_Passive` | At mission start, summon an Orbital Unit which can rebound pushing artilleries off allied units. |
-| RST Decoy | Das Keifer | `Jefepassives_RstDecoy` | At mission start, sets up a decoy structure on a random, open tile. |
-| Loneliness Amplifier | Tatu | `Jefepassives_Loneliness_Passive` | Vek take emotional damage if ending turn with no adjacent units. |
-| Awkwardness Inducer | Tatu | `Jefepassives_Awkwardness_Passive` | Vek take social anxiety damage if ending turn adjacent to other units. |
+| Name | Author | Weapon ID |
+|------|--------|-----------|
+| A.C.I.D. Rain | Truelch | `Jefepassives_AcidRain` |
+| Awkwardness Inducer | Tatu | `Jefepassives_Awkwardness` |
+| Chrono Beacons | Das Keifer | `Jefepassives_RstDecoy` |
+| Concussors | TheBoardsCousin | `Jefepassives_SpikyCleats` |
+| Data-Link | Truelch | `Jefepassives_AlignedRadar` |
+| Experimental Swapper | Truelch | `Jefepassives_RandomSwap` |
+| Intimidating Presence | Truelch | `Jefepassives_CancelNearbyAttacks` |
+| Loneliness Amplifier | Tatu | `Jefepassives_Loneliness` |
+| Materia Nanobots | TheBoardsCousin | `Jefepassives_Materia` |
+| Migratory Evoker | Das Keifer | `Jefepassives_MigratoryEvoker` |
+| Mines Dispenser | Truelch | `Jefepassives_DeployItems` |
+| Rebound Satellite | TheBoardsCousin | `Jefepassives_Rebound` |
+| RST Decoy | Das Keifer | `Jefepassives_RstDecoy` |
+| Taunting Field | Truelch | `Jefepassives_TauntingField` |
+| Water-Former | Truelch | `Jefepassives_Waterfall` |
+

@@ -2,7 +2,7 @@ local mod = {
 	id = "jefepassives",
 	name = "Jefepassives",
 	icon = "img/mod_icon.png",
-	version = "0.8.0",
+	version = "1.0.0",
 	modApiVersion = "2.9.5",
 	gameVersion = "1.2.93",
 	description = "A community pack of passive weapons made for our community YouTuber Jefepato",
@@ -26,7 +26,9 @@ local function isMemhackAvailableAndEnabled()
 			settingData and settingData.enabled
 end
 
+local warningShown = false
 local function showChronoMemhackWarning()
+	if warningShown then return end
 	modApi:scheduleHook(50, function()
 		sdlext.showInfoDialog(
 			"Requirement Warning",
@@ -43,6 +45,7 @@ local function showChronoMemhackWarning()
 			}
 		)
 	end)
+	warningShown = true
 end
 
 function mod:metadata()
@@ -88,17 +91,17 @@ function mod:init(options)
 
 	modApi:addWeaponDrop("Jefepassives_AcidRain")
 	modApi:addWeaponDrop("Jefepassives_AlignedRadar")
-	modApi:addWeaponDrop("Jefepassives_Awkwardness_Passive")
+	modApi:addWeaponDrop("Jefepassives_Awkwardness")
 	modApi:addWeaponDrop("Jefepassives_CancelNearbyAttacks")
 	modApi:addWeaponDrop("Jefepassives_DeployItems")
-	modApi:addWeaponDrop("Jefepassives_Loneliness_Passive")	
+	modApi:addWeaponDrop("Jefepassives_Loneliness")	
 	--modApi:addWeaponDrop("Jefepassives_MarkRandom")
-	modApi:addWeaponDrop("Jefepassives_Materia_Passive")
+	modApi:addWeaponDrop("Jefepassives_Materia")
 	modApi:addWeaponDrop("Jefepassives_MigratoryEvoker")
 	modApi:addWeaponDrop("Jefepassives_RandomSwap")
-	modApi:addWeaponDrop("Jefepassives_Rebound_Passive")
+	modApi:addWeaponDrop("Jefepassives_Rebound")
 	modApi:addWeaponDrop("Jefepassives_RstDecoy")
-	modApi:addWeaponDrop("Jefepassives_SpikyCleats_Passive")
+	modApi:addWeaponDrop("Jefepassives_SpikyCleats")
 	modApi:addWeaponDrop("Jefepassives_TauntingField")
 	modApi:addWeaponDrop("Jefepassives_Waterfall")
 

@@ -1,10 +1,10 @@
-Jefepassives_Materia_Passive = PassiveSkill:new{
+Jefepassives_Materia = PassiveSkill:new{
 	Name = "Materia Nanobots",
 	Description = "Mechs are Boosted when they destroy a mountain.",
 	PowerCost = 1,
 	Icon = "weapons/passives/passive_materia.png",
 	Upgrades = 0,
-	Passive = "Jefepassives_Materia_Passive",
+	Passive = "Jefepassives_Materia",
 	TipImage = {
 		Unit = Point (2,2),
 		CustomPawn = "PunchMech",
@@ -12,7 +12,7 @@ Jefepassives_Materia_Passive = PassiveSkill:new{
 		Mountain = Point(3,2),
 	}
 }
-function Jefepassives_Materia_Passive:GetSkillEffect(p1,p2)
+function Jefepassives_Materia:GetSkillEffect(p1,p2)
 	local ret = SkillEffect()
 		local direction = GetDirection(p2 - p1)
 		local damage = SpaceDamage(p2, DAMAGE_DEATH)
@@ -74,7 +74,7 @@ local function mountainChecker(mission)
 	local postcount = getMountainPostCount()
 	local ret = SkillEffect()
 	if pawn and (precount > postcount) then
-		if IsPassiveSkill("Jefepassives_Materia_Passive") and (Board:IsPawnTeam(pawn:GetSpace(), TEAM_PLAYER)) then
+		if IsPassiveSkill("Jefepassives_Materia") and (Board:IsPawnTeam(pawn:GetSpace(), TEAM_PLAYER)) then
 			pawn:SetBoosted(true)
 			Jefepassive_MountainPawn = nil
 		end

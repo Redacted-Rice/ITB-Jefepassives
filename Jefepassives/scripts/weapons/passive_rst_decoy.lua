@@ -89,7 +89,7 @@ Jefepassives_RstDecoy = PassiveSkill:new{
 		Jefepassives_RstDecoy_Pawn_Reinforced = true,
 	},
 	PlanEnvOriginalKey = "_jefepassivesRstDecoyPlanEnvOriginal",
-	Debug = true,
+	Debug = false,
 }
 
 local passiveEffect = mod_loader.mods[modApi.currentMod].libs.passiveEffect

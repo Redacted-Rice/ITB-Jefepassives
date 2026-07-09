@@ -22,6 +22,7 @@ Jefepassives_MigratoryEvoker = PassiveSkill:new{
 		Unit = Point(2, 2),
 		Enemy = Point(1, 1),
 	},
+	Debug = false,
 }
 
 local passiveEffect = mod_loader.mods[modApi.currentMod].libs.passiveEffect
@@ -138,11 +139,13 @@ function Jefepassives_MigratoryEvoker:addDuckFlyover(effect)
 	local leadSpaceY = spaceOffset + leadDuckOffset
 	local leadSpace = Point(0, leadSpaceY)
 
-	LOG("duckCount: " .. duckCount)
-	LOG("leadSpace: " .. leadSpace:GetString())
-	LOG("leadDuckOffset: " .. leadDuckOffset)
-	LOG("spaceOffset: " .. spaceOffset)
-	LOG("leadSpaceY: " .. leadSpaceY)
+	if self.Debug then
+		LOG("duckCount: " .. duckCount)
+		LOG("leadSpace: " .. leadSpace:GetString())
+		LOG("leadDuckOffset: " .. leadDuckOffset)
+		LOG("spaceOffset: " .. spaceOffset)
+		LOG("leadSpaceY: " .. leadSpaceY)
+	end
 
 	self:appendDuckAirstrike(effect, leadSpace)
 
@@ -155,8 +158,10 @@ function Jefepassives_MigratoryEvoker:addDuckFlyover(effect)
 		-- Subtracting VEC_UP moves downward (same as +VEC_DOWN). Add UP to go left on the V.
 		leftSpace = leftSpace + MIGRATION_DIRECTION_LEFT
 		rightSpace = rightSpace - MIGRATION_DIRECTION_LEFT
-		LOG("leftSpace: " .. leftSpace:GetString() .. " " .. leadDuckOffset - i)
-		LOG("rightSpace: " .. rightSpace:GetString() .. " " .. leadDuckOffset + i)
+		if self.Debug then
+			LOG("leftSpace: " .. leftSpace:GetString() .. " " .. leadDuckOffset - i)
+			LOG("rightSpace: " .. rightSpace:GetString() .. " " .. leadDuckOffset + i)
+		end
 		if Board:IsValid(leftSpace) and leadDuckOffset - i >= 0 then
 			self:appendDuckAirstrike(effect, leftSpace)
 		else
@@ -218,10 +223,10 @@ end
 
 function Jefepassives_MigratoryEvoker:GetPassiveSkillEffect_OnNextTurn(mission)
 	if Game:GetTeamTurn() ~= TEAM_ENEMY then
-		LOG("NO MIGRATE " .. Game:GetTeamTurn() .. " -----------")
+		if self.Debug then LOG("NO MIGRATE " .. Game:GetTeamTurn() .. " -----------") end
 		return
 	end
-	LOG("MIGRATING -----------")
+	if self.Debug then LOG("MIGRATING -----------") end
 	self:migrateEnemies()
 end
 

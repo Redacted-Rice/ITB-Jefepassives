@@ -5,7 +5,7 @@ Author: Das Keifer of Redacted Rice
 Discord Server: https://discord.gg/CNjTVrpN4v
 ]]
 
-local VERSION = "1.5.0"
+local VERSION = "1.6.1"
 
 -- Version check
 local isNewestVersion = false
@@ -198,7 +198,8 @@ if isNewestVersion then
 	function BoardUtils.makeGenericMatcher(pawn, pawnCheckType)
 		return BoardUtils.makeTerrainBasedMatcher(pawn, pawnCheckType, function(point)
 			local terrain = Board:GetTerrain(point)
-			return (not BoardUtils.isPawnFlying(pawn) and Board:GetTerrain(point) == TERRAIN_HOLE) or
+			return (not BoardUtils.isPawnFlying(pawn) and terrain == TERRAIN_HOLE) or
+				   (not pawn:IsMassive() and terrain == TERRAIN_WATER) or
 					terrain == TERRAIN_BUILDING or terrain == TERRAIN_MOUNTAIN
 		end)
 	end

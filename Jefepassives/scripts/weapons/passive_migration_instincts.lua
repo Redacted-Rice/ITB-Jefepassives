@@ -61,7 +61,14 @@ end
 
 function Jefepassives_MigratoryEvoker:getReachableMigrationSpaces(pawn, maxSteps)
 	local start = pawn:GetSpace()
-	return extract_table(Board:GetReachable(start, maxSteps, pawn:GetPathProf()))
+	local spaces = extract_table(Board:GetReachable(start, maxSteps, pawn:GetPathProf()))
+	local filtered = {}
+	for _, p in ipairs(spaces) do
+		if not Board:IsPod(p) then
+			table.insert(filtered, p)
+		end
+	end
+	return filtered
 end
 
 function Jefepassives_MigratoryEvoker:getMigrationSpeed(pawn)
@@ -194,7 +201,7 @@ function Jefepassives_MigratoryEvoker:addMigrationMoves(effect)
 			if destination then
 				reserved[boardUtils.getSpaceHash(destination)] = true
 
-				if Pawn:IsTeleporter() then
+				if pawn:IsTeleporter() then
 					effect:AddTeleport(pawn:GetSpace(), destination, NO_DELAY)
 				else
 					local path = Board:GetPath(pawn:GetSpace(), destination, pawn:GetPathProf())
@@ -221,16 +228,19 @@ function Jefepassives_MigratoryEvoker:migrateEnemies()
 	Board:AddEffect(effect)
 end
 
-function Jefepassives_MigratoryEvoker:GetPassiveSkillEffect_OnNextTurn(mission)
-	if Game:GetTeamTurn() ~= TEAM_ENEMY then
-		if self.Debug then LOG("NO MIGRATE " .. Game:GetTeamTurn() .. " -----------") end
-		return
+local oldPlanEnv = Mission.PlanEnvironment
+Mission["PlanEnvironment"] = function(...)
+	if IsPassiveSkill("Jefepassives_MigratoryEvoker") then
+		local weapon = Jefepassives_MigratoryEvoker
+		if IsPassiveSkill("Jefepassives_MigratoryEvoker_A") then
+			weapon = Jefepassives_MigratoryEvoker_A
+		end
+		weapon:migrateEnemies()
 	end
-	if self.Debug then LOG("MIGRATING -----------") end
-	self:migrateEnemies()
+	return oldPlanEnv(...)
 end
 
 passiveEffect:addPassiveEffect(
 	"Jefepassives_MigratoryEvoker",
-	{"onNextTurn"}
+	{}
 )

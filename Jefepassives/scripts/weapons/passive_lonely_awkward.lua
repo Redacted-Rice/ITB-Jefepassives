@@ -1,6 +1,5 @@
 -- paths and libs
 local path = mod_loader.mods[modApi.currentMod].resourcePath
-local armorDetection = mod_loader.mods[modApi.currentMod].libs.armorDetection
 
 -- add assets from our mod so the game can find them.
 modApi:appendAsset("img/weapons/passives/Jefepassives_passive_loneliness.png", path .."img/weapons/passives/passive_loneliness.png")
@@ -31,7 +30,7 @@ ANIMS.Jefepassives_Social_Anxiety = Animation:new{
 -- loneliness
 Jefepassives_Loneliness = PassiveSkill:new{
 	Name = "Loneliness Amplifier",
-	Description = "Vek take emotional damage if ending turn with no adjacent units.",
+	Description = "Vek take emotional damage if ending turn adjacent to no units.",
 	PowerCost = 2,
 	Icon = "weapons/passives/Jefepassives_passive_loneliness.png",
 	Upgrades = 0,
@@ -82,6 +81,29 @@ function Jefepassives_Awkwardness:GetSkillEffect(p1,p2)
 	return ret
 end
 
+-- target
+local function targetPawn(pawn)
+	if pawn
+		and pawn:GetTeam() == TEAM_ENEMY
+		and _G[pawn:GetType()].DefaultTeam == TEAM_ENEMY
+		and _G[pawn:GetType()].DefaultFaction ~= FACTION_BOTS
+		and not _G[pawn:GetType()].NonGrid
+		and not _G[pawn:GetType()].Neutral
+		and not _G[pawn:GetType()].Corporate
+		-- and not _G[pawn:GetType()].Minor
+	then
+		return true
+	end
+end
+
+-- exceptions
+-- local exceptions = {
+-- 	BonusDebris = true,
+-- 	Wall = true,
+-- 	RockThrown = true,
+-- 	BombRock = true
+-- }
+
 -- events
 local function applyDamage(fx)
 	local Awkwardness = IsPassiveSkill("Jefepassives_Awkwardness")
@@ -92,61 +114,33 @@ local function applyDamage(fx)
 		local pawnList = extract_table(Board:GetPawns(TEAM_ENEMY))
 		for i = 1, #pawnList do
 			local currPawn = Board:GetPawn(pawnList[i])
-			local currSpace = currPawn:GetSpace()
-			local lonely = loneliness
-			local awkward = false
-			for i = DIR_START, DIR_END do
-				if Board:GetPawn(currSpace + DIR_VECTORS[i]) then
-					lonely = false
-					awkward = Awkwardness
+			if targetPawn(currPawn) then
+				local currSpace = currPawn:GetSpace()
+				local lonely = loneliness
+				local awkward = false
+				for i = DIR_START, DIR_END do
+					local adjPawn = Board:GetPawn(currSpace + DIR_VECTORS[i])
+					if adjPawn
+						-- and not _G[adjPawn:GetType()].NonGrid
+						-- and not exceptions[adjPawn:GetType()]
+					then
+						lonely = false
+						awkward = Awkwardness
+					end
 				end
-			end
-			if lonely or awkward then
-				-- currPawn:SetHealth(currPawn:GetHealth()-1)
-				-- local sound = _G[currPawn:GetType()].SoundLocation..'hurt'
-				-- Game:TriggerSound(sound)
-				local damage = SpaceDamage(currSpace,1)
-				if lonely then damage.sAnimation = "Jefepassives_Emotional_Damage" end
-				if awkward then damage.sAnimation = "Jefepassives_Social_Anxiety" end
-				-- damage.sSound = _G[currPawn:GetType()].SoundLocation..'hurt'
-				if armorDetection.IsArmor(currPawn) then damage.iDamage = 2 end
-				local shield = currPawn:IsShield()
-				local acid = currPawn:IsAcid()
-				local ice = currPawn:IsFrozen()
-				local crack = Board:IsCracked(currSpace)
-				effect:AddScript([[
-					local pawn = Board:GetPawn(]]..currSpace:GetString()..[[)
-					if ]]..tostring(shield)..[[ then
-						pawn:SetShield(false,true)
-					end
-					if ]]..tostring(acid)..[[ then
-						pawn:SetAcid(false,true)
-					end
-					if ]]..tostring(ice)..[[ then
-						pawn:SetFrozen(false,true)
-					end
-					if ]]..tostring(crack)..[[ then
-						Board:SetCracked(pawn:GetSpace(),false)
-					end
-				]])
-				effect:AddSafeDamage(damage)
-				effect:AddBounce(currSpace,-2)
-				effect:AddScript([[
-					local pawn = Board:GetPawn(]]..currSpace:GetString()..[[)
-					if ]]..tostring(shield)..[[ then
-						pawn:SetShield(true,true)
-					end
-					if ]]..tostring(acid)..[[ then
-						pawn:SetAcid(true,true)
-					end
-					if ]]..tostring(ice)..[[ then
-						pawn:SetFrozen(true,true)
-					end
-					if ]]..tostring(crack)..[[ then
-						Board:SetCracked(pawn:GetSpace(),true)
-					end
-				]])
-				effect:AddDelay(delay)
+				if lonely or awkward then
+					local damage = SpaceDamage(currSpace)
+					if lonely then damage.sAnimation = "Jefepassives_Emotional_Damage" end
+					if awkward then damage.sAnimation = "Jefepassives_Social_Anxiety" end
+					damage.sSound = _G[currPawn:GetType()].SoundLocation..'hurt'
+					effect:AddDamage(damage)
+					effect:AddScript([[
+						local pawn = Board:GetPawn(]]..currSpace:GetString()..[[)
+						pawn:ModifyHealth(-1,true,0)
+					]])
+					effect:AddBounce(currSpace,-1)
+					effect:AddDelay(delay)
+				end
 			end
 		end
 		Board:AddEffect(effect)

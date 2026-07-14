@@ -61,7 +61,6 @@ end
 function mod:init(options)
 	options = options or {}
 
-	self.libs.armorDetection = require(self.scriptPath .. "libs/armorDetection")
 	self.libs.boardUtils = require(self.scriptPath .. "libs/boardUtils")
 	self.libs.passiveEffect = require(self.scriptPath .. "libs/passiveEffect")
 	self.libs.pawnTypeUtils = require(self.scriptPath .. "libs/pawnTypeUtils")

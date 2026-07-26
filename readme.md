@@ -33,7 +33,6 @@ Place the `Jefepassives` folder in `Into the Breach/mods/`. When you open the fo
 | A.C.I.D. Rain | Truelch | `Jefepassives_AcidRain` |
 | Awkwardness Inducer | Tatu | `Jefepassives_Awkwardness` |
 | Chrono Beacons | Das Keifer | `Jefepassives_RstDecoy` |
-| Concussors | TheBoardsCousin | `Jefepassives_SpikyCleats` |
 | Data-Link | Truelch | `Jefepassives_AlignedRadar` |
 | Experimental Swapper | Truelch | `Jefepassives_RandomSwap` |
 | Intimidating Presence | Truelch | `Jefepassives_CancelNearbyAttacks` |

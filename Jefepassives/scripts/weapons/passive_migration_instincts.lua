@@ -278,15 +278,21 @@ function Jefepassives_MigratoryEvoker:migrateEnemies()
 end
 
 local oldPlanEnv = Mission.PlanEnvironment
-Mission["PlanEnvironment"] = function(...)
-	if IsPassiveSkill("Jefepassives_MigratoryEvoker") then
-		local weapon = Jefepassives_MigratoryEvoker
-		if IsPassiveSkill("Jefepassives_MigratoryEvoker_A") then
-			weapon = Jefepassives_MigratoryEvoker_A
+Mission.PlanEnvironment = function(self, ...)
+	if self.jefepassivesMigrationTurn  ~= Game:GetTurnCount() then
+		self.jefepassivesMigrationTurn = Game:GetTurnCount()
+		if IsPassiveSkill("Jefepassives_MigratoryEvoker") then
+			local weapon = Jefepassives_MigratoryEvoker
+			if IsPassiveSkill("Jefepassives_MigratoryEvoker_A") then
+				weapon = Jefepassives_MigratoryEvoker_A
+			end
+			weapon:migrateEnemies()
+			-- True will prevent the first env from planning before the effect
+			return true
 		end
-		weapon:migrateEnemies()
 	end
-	return oldPlanEnv(...)
+
+	return oldPlanEnv(self, ...)
 end
 
 passiveEffect:addPassiveEffect(

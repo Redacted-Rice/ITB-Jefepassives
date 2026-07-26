@@ -1,6 +1,6 @@
 local mod = {
-	id = "jefepassives",
-	name = "Jefepassives",
+	id = "JefePassives",
+	name = "JefePassives",
 	icon = "img/mod_icon.png",
 	version = "1.0.0",
 	modApiVersion = "2.9.5",

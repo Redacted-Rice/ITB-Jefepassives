@@ -1,11 +1,13 @@
 --[[
 BoardUtils - Utilities related to board, pathing, and movement
 
+Libs Wiki: https://github.com/Redacted-Rice/ITB-RedactedRiceMods/wiki
+
 Author: Das Keifer of Redacted Rice
 Discord Server: https://discord.gg/CNjTVrpN4v
 ]]
 
-local VERSION = "1.5.0"
+local VERSION = "1.7.0"
 
 -- Version check
 local isNewestVersion = false
@@ -158,6 +160,13 @@ if isNewestVersion then
 		end
 	end
 
+	function BoardUtils.isAPlayerTeam(team)
+		return team == TEAM_PLAYER or team == TEAM_MECH
+	end
+	function BoardUtils.isAnEnemyTeam(team)
+		return team == TEAM_BOTS or team == TEAM_ENEMY or team == TEAM_ENEMY_MAJOR
+	end
+
 	function BoardUtils.makeTerrainBasedMatcher(pawn, pawnCheckType, exclTerrainCheckFn)
 		return function(point, hash)
 			if exclTerrainCheckFn(point) then
@@ -176,11 +185,14 @@ if isNewestVersion then
 				if BoardUtils.isPawnFlying(pawn) then
 					return true
 				end
-				-- Otherwise only can't pass through enemies
-				local pawnTeam = otherPawn:GetTeam()
-				if pawnCheckType == "default" and (pawnTeam == TEAM_BOTS or
-						pawnTeam == TEAM_ENEMY or pawnTeam == TEAM_ENEMY_MAJOR) then
-					return false
+				-- Block opposing team pawns as default
+				if pawnCheckType == "default" then
+					local moverTeam = pawn:GetTeam()
+					local otherTeam = otherPawn:GetTeam()
+					if BoardUtils.isAPlayerTeam(moverTeam) and BoardUtils.isAnEnemyTeam(otherTeam) or
+							BoardUtils.isAnEnemyTeam(moverTeam) and BoardUtils.isAPlayerTeam(otherTeam) then
+						return false
+					end
 				end
 			end
 			return true
@@ -198,7 +210,8 @@ if isNewestVersion then
 	function BoardUtils.makeGenericMatcher(pawn, pawnCheckType)
 		return BoardUtils.makeTerrainBasedMatcher(pawn, pawnCheckType, function(point)
 			local terrain = Board:GetTerrain(point)
-			return (not BoardUtils.isPawnFlying(pawn) and Board:GetTerrain(point) == TERRAIN_HOLE) or
+			return (not BoardUtils.isPawnFlying(pawn) and terrain == TERRAIN_HOLE) or
+				   (not pawn:IsMassive() and terrain == TERRAIN_WATER) or
 					terrain == TERRAIN_BUILDING or terrain == TERRAIN_MOUNTAIN
 		end)
 	end
@@ -406,8 +419,7 @@ if isNewestVersion then
 		return candidates
 	end
 
-	function BoardUtils:init()
-		-- Initialize event subscriptions
+	function BoardUtils:finalizeInit()
 		modapiext.events.onPawnUndoMove:subscribe(function(mission, pawn, undonePosition)
 			BoardUtils.clearHijackedPath()
 		end)
@@ -422,5 +434,20 @@ if isNewestVersion then
 else
 	LOG("BoardUtils: Skipping version " .. VERSION .. " (already have " .. BoardUtils.version .. ")")
 end
+
+local function onModsInitialized()
+	if VERSION < BoardUtils.version then
+		return
+	end
+
+	if BoardUtils.initialized then
+		return
+	end
+
+	BoardUtils:finalizeInit()
+	BoardUtils.initialized = true
+end
+
+modApi:addModsInitializedHook(onModsInitialized)
 
 return BoardUtils

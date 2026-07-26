@@ -3,6 +3,7 @@ local MIGRATION_DIRECTION = DIR_VECTORS[DIR_RIGHT]
 local MIGRATION_DIRECTION_LEFT = DIR_VECTORS[DIR_UP]
 local DUCK_FLYOVER_IMAGE = "effects/flying_duck.png"
 local DUCK_FLYOVER_STAGGER = 0.12
+local MIGRATION_MOVE_DELAY = 0.1
 
 local boardUtils = mod_loader.mods[modApi.currentMod].libs.boardUtils
 
@@ -22,6 +23,7 @@ Jefepassives_MigratoryEvoker = PassiveSkill:new{
 		Unit = Point(2, 2),
 		Enemy = Point(1, 1),
 	},
+	Debug = false,
 }
 
 local passiveEffect = mod_loader.mods[modApi.currentMod].libs.passiveEffect
@@ -58,9 +60,29 @@ function Jefepassives_MigratoryEvoker:GetSkillEffect(p1, p2)
 	return ret
 end
 
-function Jefepassives_MigratoryEvoker:getReachableMigrationSpaces(pawn, maxSteps)
+function Jefepassives_MigratoryEvoker:getReachableMigrationSpaces(pawn, maxSteps, occupied)
 	local start = pawn:GetSpace()
-	return extract_table(Board:GetReachable(start, maxSteps, pawn:GetPathProf()))
+	local terrainMatcher = boardUtils.makeGenericMatcher(pawn, "none")
+	local isFlying = boardUtils.isPawnFlying(pawn)
+
+	local function stoppable(point, hash)
+		if not terrainMatcher(point, hash) then
+			return false
+		end
+		return not occupied[hash]
+	end
+
+	local reachable = PointList()
+	boardUtils.getReachableInRange(reachable, maxSteps, start, terrainMatcher, stoppable)
+
+	local filtered = {}
+	for i = 1, reachable:size() do
+		local p = reachable:index(i)
+		if not Board:IsPod(p) then
+			table.insert(filtered, p)
+		end
+	end
+	return filtered
 end
 
 function Jefepassives_MigratoryEvoker:getMigrationSpeed(pawn)
@@ -86,7 +108,7 @@ function Jefepassives_MigratoryEvoker:scoreMigrationDestination(start, point, di
 	return progress * 1000 - perpendicular
 end
 
-function Jefepassives_MigratoryEvoker:getMigrationDestination(pawn, direction, maxSteps, reserved)
+function Jefepassives_MigratoryEvoker:getMigrationDestination(pawn, direction, maxSteps, occupied)
 	if maxSteps <= 0 then
 		return nil
 	end
@@ -95,8 +117,8 @@ function Jefepassives_MigratoryEvoker:getMigrationDestination(pawn, direction, m
 	local best = nil
 	local bestScore = nil
 
-	for _, point in ipairs(self:getReachableMigrationSpaces(pawn, maxSteps)) do
-		if point ~= start and not (reserved and reserved[boardUtils.getSpaceHash(point)]) then
+	for _, point in ipairs(self:getReachableMigrationSpaces(pawn, maxSteps, occupied)) do
+		if point ~= start and not occupied[boardUtils.getSpaceHash(point)] then
 			local score = self:scoreMigrationDestination(start, point, direction)
 			if score and (not bestScore or score > bestScore) then
 				bestScore = score
@@ -105,6 +127,34 @@ function Jefepassives_MigratoryEvoker:getMigrationDestination(pawn, direction, m
 		end
 	end
 	return best
+end
+
+function Jefepassives_MigratoryEvoker:buildOccupancy()
+	local occupied = {}
+	for _, pawnId in ipairs(extract_table(Board:GetPawns(TEAM_ANY))) do
+		local pawn = Board:GetPawn(pawnId)
+		if pawn and Board:IsPawnAlive(pawnId) and not pawn:IsDead() then
+			local hash = boardUtils.getSpaceHash(pawn:GetSpace())
+			occupied[hash] = pawnId
+			LOG("occupied " .. pawn:GetSpace():GetString() .. " with pawn " .. pawn:GetType())
+		end
+	end
+	return occupied
+end
+
+function Jefepassives_MigratoryEvoker:addMigrationMove(effect, pawn, from, to)
+	if pawn:IsTeleporter() then
+		effect:AddTeleport(from, to, MIGRATION_MOVE_DELAY)
+	else
+		local path = Board:GetPath(from, to, pawn:GetPathProf())
+		if pawn:IsJumper() then
+			effect:AddLeap(path, MIGRATION_MOVE_DELAY)
+		elseif pawn:IsBurrower() then
+			effect:AddBurrow(path, MIGRATION_MOVE_DELAY)
+		else
+			effect:AddMove(path, MIGRATION_MOVE_DELAY)
+		end
+	end
 end
 
 function Jefepassives_MigratoryEvoker:appendDuckAirstrike(effect, space)
@@ -138,11 +188,13 @@ function Jefepassives_MigratoryEvoker:addDuckFlyover(effect)
 	local leadSpaceY = spaceOffset + leadDuckOffset
 	local leadSpace = Point(0, leadSpaceY)
 
-	LOG("duckCount: " .. duckCount)
-	LOG("leadSpace: " .. leadSpace:GetString())
-	LOG("leadDuckOffset: " .. leadDuckOffset)
-	LOG("spaceOffset: " .. spaceOffset)
-	LOG("leadSpaceY: " .. leadSpaceY)
+	if self.Debug then
+		LOG("duckCount: " .. duckCount)
+		LOG("leadSpace: " .. leadSpace:GetString())
+		LOG("leadDuckOffset: " .. leadDuckOffset)
+		LOG("spaceOffset: " .. spaceOffset)
+		LOG("leadSpaceY: " .. leadSpaceY)
+	end
 
 	self:appendDuckAirstrike(effect, leadSpace)
 
@@ -155,8 +207,10 @@ function Jefepassives_MigratoryEvoker:addDuckFlyover(effect)
 		-- Subtracting VEC_UP moves downward (same as +VEC_DOWN). Add UP to go left on the V.
 		leftSpace = leftSpace + MIGRATION_DIRECTION_LEFT
 		rightSpace = rightSpace - MIGRATION_DIRECTION_LEFT
-		LOG("leftSpace: " .. leftSpace:GetString() .. " " .. leadDuckOffset - i)
-		LOG("rightSpace: " .. rightSpace:GetString() .. " " .. leadDuckOffset + i)
+		if self.Debug then
+			LOG("leftSpace: " .. leftSpace:GetString() .. " " .. leadDuckOffset - i)
+			LOG("rightSpace: " .. rightSpace:GetString() .. " " .. leadDuckOffset + i)
+		end
 		if Board:IsValid(leftSpace) and leadDuckOffset - i >= 0 then
 			self:appendDuckAirstrike(effect, leftSpace)
 		else
@@ -176,37 +230,44 @@ function Jefepassives_MigratoryEvoker:addDuckFlyover(effect)
 end
 
 function Jefepassives_MigratoryEvoker:addMigrationMoves(effect)
-	local reserved = {}
-	local moves = {}
+	local occupied = self:buildOccupancy()
+	local processedPawns = {}
+	local size = Board:GetSize()
+	local anyMoved = false
 
-	for _, pawnId in ipairs(extract_table(Board:GetPawns(TEAM_ENEMY))) do
-		local pawn = Board:GetPawn(pawnId)
-		if pawn and Board:IsPawnAlive(pawnId) and not pawn:IsDead() and not pawn:IsFrozen() then
-			local maxSteps = self:getMigrationSpeed(pawn)
-			local destination = self:getMigrationDestination(pawn,
-					MIGRATION_DIRECTION, maxSteps, reserved)
+	for x = size.x - 1, 0, -1 do
+		for y = 0, size.y - 1 do
+			local space = Point(x, y)
+			if Board:IsValid(space) then
+				local hash = boardUtils.getSpaceHash(space)
+				local pawn = Board:GetPawn(space)
+				local pawnId = pawn and pawn:GetId()
 
-			if destination then
-				reserved[boardUtils.getSpaceHash(destination)] = true
+				if pawn and pawn:GetTeam() == TEAM_ENEMY and not processedPawns[pawnId] 
+						and Board:IsPawnAlive(pawnId) and not pawn:IsDead() and 
+						not pawn:IsFrozen() then
+					local maxSteps = self:getMigrationSpeed(pawn)
+					local destination = self:getMigrationDestination(
+							pawn, MIGRATION_DIRECTION, maxSteps, occupied)
 
-				if Pawn:IsTeleporter() then
-					effect:AddTeleport(pawn:GetSpace(), destination, NO_DELAY)
-				else
-					local path = Board:GetPath(pawn:GetSpace(), destination, pawn:GetPathProf())
-					if pawn:IsJumper() then
-						effect:AddLeap(path, NO_DELAY)
-					elseif pawn:IsBurrower() then
-						effect:AddBurrow(path, NO_DELAY)
-					else
-						effect:AddMove(path, NO_DELAY)
+					if destination then
+						self:addMigrationMove(effect, pawn, space, destination)
+						occupied[hash] = nil
+						LOG("moved pawn " .. pawn:GetType() .. " from " .. space:GetString() .. " to " .. destination:GetString())
+
+						local destHash = boardUtils.getSpaceHash(destination)
+						occupied[destHash] = pawnId
+						anyMoved = true
 					end
+					LOG("processed pawn " .. pawn:GetType() .. " at " .. space:GetString())
+					processedPawns[pawnId] = true
 				end
 			end
 		end
 	end
 
 	effect:AddDelay(1.2)
-	return #moves > 0
+	return anyMoved
 end
 
 function Jefepassives_MigratoryEvoker:migrateEnemies()
@@ -216,16 +277,25 @@ function Jefepassives_MigratoryEvoker:migrateEnemies()
 	Board:AddEffect(effect)
 end
 
-function Jefepassives_MigratoryEvoker:GetPassiveSkillEffect_OnNextTurn(mission)
-	if Game:GetTeamTurn() ~= TEAM_ENEMY then
-		LOG("NO MIGRATE " .. Game:GetTeamTurn() .. " -----------")
-		return
+local oldPlanEnv = Mission.PlanEnvironment
+Mission.PlanEnvironment = function(self, ...)
+	if self.jefepassivesMigrationTurn  ~= Game:GetTurnCount() then
+		self.jefepassivesMigrationTurn = Game:GetTurnCount()
+		if IsPassiveSkill("Jefepassives_MigratoryEvoker") then
+			local weapon = Jefepassives_MigratoryEvoker
+			if IsPassiveSkill("Jefepassives_MigratoryEvoker_A") then
+				weapon = Jefepassives_MigratoryEvoker_A
+			end
+			weapon:migrateEnemies()
+			-- True will prevent the first env from planning before the effect
+			return true
+		end
 	end
-	LOG("MIGRATING -----------")
-	self:migrateEnemies()
+
+	return oldPlanEnv(self, ...)
 end
 
 passiveEffect:addPassiveEffect(
 	"Jefepassives_MigratoryEvoker",
-	{"onNextTurn"}
+	{}
 )

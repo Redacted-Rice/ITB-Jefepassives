@@ -212,7 +212,7 @@ function Jefepassives_ChronoBeacons:getVekPriorityTier(pawn)
 	if pawnTypeUtils.isSpawnCategory(pawn, "Leader") then
 		return 3
 	end
-	if pawn.Tier == TIER_ALPHA then
+	if _G[pawn:GetType()].Tier == TIER_ALPHA then
 		return 2
 	end
 	if pawnTypeUtils.isSpawnCategory(pawn, "Unique") then

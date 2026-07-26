@@ -34,7 +34,7 @@ When creating a weapon:
 			"preEnvironmentHook"})
  ]]--
 
-local VERSION = "1.5.0"
+local VERSION = "2.0.0"
 
 -- Version check
 local isNewestVersion = false
@@ -621,9 +621,10 @@ local function onModsInitializedHook()
 		return
 	end
 
-	if BoardUtils.initialized then
+	if PassiveEffect.initialized then
 		return
 	end
+
 	PassiveEffect:finalizeInit()
 	PassiveEffect.initialized = true
 end

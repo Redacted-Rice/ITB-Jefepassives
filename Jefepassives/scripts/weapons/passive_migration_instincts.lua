@@ -62,18 +62,20 @@ end
 
 function Jefepassives_MigratoryEvoker:getReachableMigrationSpaces(pawn, maxSteps, occupied)
 	local start = pawn:GetSpace()
-	local terrainMatcher = boardUtils.makeGenericMatcher(pawn, "none")
-	local isFlying = boardUtils.isPawnFlying(pawn)
+	-- default behavior is flying can pass through enemies, ground units cannot
+	local passable = boardUtils.makeGenericMatcher(pawn, "default")
+	-- land only on valid empty tiles using default behavior
+	local stoppableMatcher = boardUtils.makeGenericMatcher(pawn, "any")
 
 	local function stoppable(point, hash)
-		if not terrainMatcher(point, hash) then
+		if not stoppableMatcher(point, hash) then
 			return false
 		end
 		return not occupied[hash]
 	end
 
 	local reachable = PointList()
-	boardUtils.getReachableInRange(reachable, maxSteps, start, terrainMatcher, stoppable)
+	boardUtils.getReachableInRange(reachable, maxSteps, start, passable, stoppable)
 
 	local filtered = {}
 	for i = 1, reachable:size() do

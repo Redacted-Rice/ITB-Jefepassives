@@ -9,7 +9,7 @@ local boardUtils = mod_loader.mods[modApi.currentMod].libs.boardUtils
 
 Jefepassives_MigratoryEvoker = PassiveSkill:new{
 	Name = "Migratory Evoker",
-	Description = "At the start of the Vek turn, each Vek attempts to move one tile to the right.",
+	Description = "After the Vek spawn phase each turn, each Vek attempts to move one tile to the south east.",
 	Icon = "weapons/passives/passive_migration_instincts.png",
 	Rarity = 1,
 	PowerCost = 0,

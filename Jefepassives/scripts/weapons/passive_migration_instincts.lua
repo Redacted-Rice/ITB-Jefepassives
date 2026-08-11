@@ -136,7 +136,9 @@ function Jefepassives_MigratoryEvoker:buildOccupancy()
 		if pawn and Board:IsPawnAlive(pawnId) and not pawn:IsDead() then
 			local hash = boardUtils.getSpaceHash(pawn:GetSpace())
 			occupied[hash] = pawnId
-			LOG("occupied " .. pawn:GetSpace():GetString() .. " with pawn " .. pawn:GetType())
+			if self.Debug then
+				LOG("occupied " .. pawn:GetSpace():GetString() .. " with pawn " .. pawn:GetType())
+			end
 		end
 	end
 	return occupied
@@ -243,8 +245,8 @@ function Jefepassives_MigratoryEvoker:addMigrationMoves(effect)
 				local pawn = Board:GetPawn(space)
 				local pawnId = pawn and pawn:GetId()
 
-				if pawn and pawn:GetTeam() == TEAM_ENEMY and not processedPawns[pawnId] 
-						and Board:IsPawnAlive(pawnId) and not pawn:IsDead() and 
+				if pawn and pawn:GetTeam() == TEAM_ENEMY and not processedPawns[pawnId]
+						and Board:IsPawnAlive(pawnId) and not pawn:IsDead() and
 						not pawn:IsFrozen() then
 					local maxSteps = self:getMigrationSpeed(pawn)
 					local destination = self:getMigrationDestination(
@@ -253,13 +255,17 @@ function Jefepassives_MigratoryEvoker:addMigrationMoves(effect)
 					if destination then
 						self:addMigrationMove(effect, pawn, space, destination)
 						occupied[hash] = nil
-						LOG("moved pawn " .. pawn:GetType() .. " from " .. space:GetString() .. " to " .. destination:GetString())
+						if self.Debug then
+							LOG("moved pawn " .. pawn:GetType() .. " from " .. space:GetString() .. " to " .. destination:GetString())
+						end
 
 						local destHash = boardUtils.getSpaceHash(destination)
 						occupied[destHash] = pawnId
 						anyMoved = true
 					end
-					LOG("processed pawn " .. pawn:GetType() .. " at " .. space:GetString())
+					if self.Debug then
+						LOG("processed pawn " .. pawn:GetType() .. " at " .. space:GetString())
+					end
 					processedPawns[pawnId] = true
 				end
 			end

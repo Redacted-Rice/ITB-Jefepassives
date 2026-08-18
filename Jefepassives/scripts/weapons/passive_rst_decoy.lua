@@ -135,10 +135,58 @@ function Jefepassives_RstDecoy:getDecoyPawnType()
 	return "Jefepassives_RstDecoy_Pawn"
 end
 
-function Jefepassives_RstDecoy:GetPassiveSkillEffect_MissionStartHook(mission)
+function Jefepassives_RstDecoy:getPylonTiles()
+	if not Board then
+		return {}
+	end
+	return extract_table(Board:GetZone("pylons"))
+end
+
+function Jefepassives_RstDecoy:getDeploymentTiles()
+	if not Board then
+		return {}
+	end
+	return modApi.deployment.getDeploymentZone()
+end
+
+function Jefepassives_RstDecoy:getExcludedSpawnHashes()
+	-- Hash by coordinates for easier lookup
+	local excluded = {}
+	for _, point in ipairs(self:getPylonTiles()) do
+		excluded[boardUtils.getSpaceHash(point)] = true
+	end
+	for _, point in ipairs(self:getDeploymentTiles()) do
+		excluded[boardUtils.getSpaceHash(point)] = true
+	end
+	return excluded
+end
+
+function Jefepassives_RstDecoy:getSpawnChoices()
+	local excluded = self:getExcludedSpawnHashes()
+	local candidates = {}
+	local boardSize = Board:GetSize()
+
+	for x = 0, boardSize.x - 1 do
+		for y = 0, boardSize.y - 1 do
+			local point = Point(x, y)
+			if not excluded[boardUtils.getSpaceHash(point)]
+					and boardUtils.isSafeSpawnTile(point, PATH_GROUND) then
+				table.insert(candidates, point)
+			end
+		end
+	end
+
+	return candidates
+end
+
+function Jefepassives_RstDecoy:spawnDecoys()
+	if not Board then
+		if self.Debug then LOG("Jefepassives RST Decoy: spawn skipped (no board)") end
+		return
+	end
+
 	local pawnType = self:getDecoyPawnType()
-	-- TODO: Decide on if I want it massive or not and what that means for the pathing
-	local choices = boardUtils.getSafeSpawnTiles(PATH_GROUND)
+	local choices = self:getSpawnChoices()
 	local spawnCount = math.min(self.DecoyCount, #choices)
 	if self.Debug then LOG(string.format("Jefepassives RST Decoy: Spawning %d pawns", spawnCount)) end
 
@@ -155,9 +203,17 @@ function Jefepassives_RstDecoy:GetPassiveSkillEffect_MissionStartHook(mission)
 	end
 end
 
+function Jefepassives_RstDecoy:GetPassiveSkillEffect_MissionStartHook(mission)
+	self:spawnDecoys()
+end
+
+function Jefepassives_RstDecoy:GetPassiveSkillEffect_MissionNextPhaseCreatedHook(mission)
+	self:spawnDecoys()
+end
+
 passiveEffect:addPassiveEffect(
 	"Jefepassives_RstDecoy",
-	{"missionStartHook"}
+	{"missionStartHook", "missionNextPhaseCreatedHook"}
 )
 
 function Jefepassives_RstDecoy:isDecoyPawn(pawn)

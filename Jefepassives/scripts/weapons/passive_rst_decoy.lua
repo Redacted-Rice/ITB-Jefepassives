@@ -69,7 +69,7 @@ AddPawn("Jefepassives_RstDecoy_Pawn_Reinforced")
 
 Jefepassives_RstDecoy = PassiveSkill:new{
 	Name = "RST Decoy",
-	Description = "At mission start setups a decoy on a random tile.",
+	Description = "After deployment, drops a decoy onto a random empty tile.",
 	Icon = "weapons/passives/passive_rst_decoy.png",
 	Rarity = 1,
 	PowerCost = 1,
@@ -109,7 +109,7 @@ Jefepassives_RstDecoy_A = Jefepassives_RstDecoy:new{
 
 Weapon_Texts.Jefepassives_RstDecoy_Upgrade2 = "Mass Produce"
 Jefepassives_RstDecoy_B = Jefepassives_RstDecoy:new{
-	UpgradeDescription = "Places an additional decoy.",
+	UpgradeDescription = "Drops an additional decoy.",
 	DecoyCount = 2,
 }
 
@@ -135,48 +135,8 @@ function Jefepassives_RstDecoy:getDecoyPawnType()
 	return "Jefepassives_RstDecoy_Pawn"
 end
 
-function Jefepassives_RstDecoy:getPylonTiles()
-	if not Board then
-		return {}
-	end
-	return extract_table(Board:GetZone("pylons"))
-end
-
-function Jefepassives_RstDecoy:getDeploymentTiles()
-	if not Board then
-		return {}
-	end
-	return modApi.deployment.getDeploymentZone()
-end
-
-function Jefepassives_RstDecoy:getExcludedSpawnHashes()
-	-- Hash by coordinates for easier lookup
-	local excluded = {}
-	for _, point in ipairs(self:getPylonTiles()) do
-		excluded[boardUtils.getSpaceHash(point)] = true
-	end
-	for _, point in ipairs(self:getDeploymentTiles()) do
-		excluded[boardUtils.getSpaceHash(point)] = true
-	end
-	return excluded
-end
-
 function Jefepassives_RstDecoy:getSpawnChoices()
-	local excluded = self:getExcludedSpawnHashes()
-	local candidates = {}
-	local boardSize = Board:GetSize()
-
-	for x = 0, boardSize.x - 1 do
-		for y = 0, boardSize.y - 1 do
-			local point = Point(x, y)
-			if not excluded[boardUtils.getSpaceHash(point)]
-					and boardUtils.isSafeSpawnTile(point, PATH_GROUND) then
-				table.insert(candidates, point)
-			end
-		end
-	end
-
-	return candidates
+	return boardUtils.getSafeSpawnTiles(PATH_GROUND)
 end
 
 function Jefepassives_RstDecoy:spawnDecoys()
@@ -195,25 +155,35 @@ function Jefepassives_RstDecoy:spawnDecoys()
 				#choices, self.DecoyCount))
 	end
 
+	if spawnCount <= 0 then
+		return
+	end
+
+	-- Same dropper used for final-island pylons: fall from above, then apply SpaceDamage.
+	local effect = SkillEffect()
 	for i = 1, spawnCount do
 		local choice = random_removal(choices)
-		local decoy = PAWN_FACTORY:CreatePawn(pawnType)
-		Board:AddPawn(decoy, choice)
-		if self.Debug then LOG(string.format("Jefepassives RST Decoy: Spawned pawn at %s", choice:GetString())) end
+		local drop = SpaceDamage(choice, 0)
+		drop.sPawn = pawnType
+		drop.bHide = true
+		effect:AddDropper(drop, "units/passive/fake_building_standing.png")
+		if self.Debug then LOG(string.format("Jefepassives RST Decoy: Dropping pawn at %s", choice:GetString())) end
+		if i < spawnCount then
+			effect:AddDelay(0.5)
+		end
 	end
+	Board:AddEffect(effect)
 end
 
-function Jefepassives_RstDecoy:GetPassiveSkillEffect_MissionStartHook(mission)
-	self:spawnDecoys()
-end
-
-function Jefepassives_RstDecoy:GetPassiveSkillEffect_MissionNextPhaseCreatedHook(mission)
-	self:spawnDecoys()
+function Jefepassives_RstDecoy:GetPassiveSkillEffect_OnNextTurn(mission)
+	if Game:GetTurnCount() == 0 and Game:GetTeamTurn() == TEAM_ENEMY then
+		self:spawnDecoys()
+	end
 end
 
 passiveEffect:addPassiveEffect(
 	"Jefepassives_RstDecoy",
-	{"missionStartHook", "missionNextPhaseCreatedHook"}
+	{"onNextTurn"}
 )
 
 function Jefepassives_RstDecoy:isDecoyPawn(pawn)

@@ -89,6 +89,8 @@ Jefepassives_RstDecoy = PassiveSkill:new{
 		Jefepassives_RstDecoy_Pawn_Reinforced = true,
 	},
 	PlanEnvOriginalKey = "_jefepassivesRstDecoyPlanEnvOriginal",
+	IsEnvEffectOriginalKey = "_jefepassivesRstDecoyIsEnvEffectOriginal",
+	SpawnedKey = "_jefepassivesRstDecoySpawned",
 	Debug = false,
 }
 
@@ -135,8 +137,64 @@ function Jefepassives_RstDecoy:getDecoyPawnType()
 	return "Jefepassives_RstDecoy_Pawn"
 end
 
+function Jefepassives_RstDecoy:getPylonHashes()
+	local hashes = {}
+	if not Board then
+		return hashes
+	end
+	-- Pylons have not dropped yet in volcano phase 1, so those tiles
+	-- still look empty/safe. Exclude the zone itself.
+	for _, point in ipairs(extract_table(Board:GetZone("pylons"))) do
+		hashes[boardUtils.getSpaceHash(point)] = true
+	end
+	return hashes
+end
+
+-- Final-island phase 2 starts with mechs off-board. Hardcode the usual
+-- deploy cluster so decoys cannot land on those tiles.
+Jefepassives_RstDecoy.UNKNOWN_MECH_EXCLUSIONS = {
+	Point(2, 3),
+	Point(2, 4),
+	Point(3, 3),
+	Point(3, 4),
+}
+
+function Jefepassives_RstDecoy:areMechPositionsUnknown()
+	if not Board then
+		return true
+	end
+	for pawnId = 0, 2 do
+		local pawn = Board:GetPawn(pawnId)
+		if pawn and Board:IsValid(pawn:GetSpace()) then
+			return false
+		end
+	end
+	return true
+end
+
+function Jefepassives_RstDecoy:getUnknownMechExclusionHashes()
+	local hashes = {}
+	if not self:areMechPositionsUnknown() then
+		return hashes
+	end
+	for _, point in ipairs(self.UNKNOWN_MECH_EXCLUSIONS) do
+		hashes[boardUtils.getSpaceHash(point)] = true
+	end
+	return hashes
+end
+
 function Jefepassives_RstDecoy:getSpawnChoices()
-	return boardUtils.getSafeSpawnTiles(PATH_GROUND)
+	local excluded = self:getPylonHashes()
+	for hash, _ in pairs(self:getUnknownMechExclusionHashes()) do
+		excluded[hash] = true
+	end
+	local candidates = {}
+	for _, point in ipairs(boardUtils.getSafeSpawnTiles(PATH_GROUND)) do
+		if not excluded[boardUtils.getSpaceHash(point)] then
+			table.insert(candidates, point)
+		end
+	end
+	return candidates
 end
 
 function Jefepassives_RstDecoy:spawnDecoys()
@@ -175,15 +233,22 @@ function Jefepassives_RstDecoy:spawnDecoys()
 	Board:AddEffect(effect)
 end
 
-function Jefepassives_RstDecoy:GetPassiveSkillEffect_OnNextTurn(mission)
-	if Game:GetTurnCount() == 0 and Game:GetTeamTurn() == TEAM_ENEMY then
-		self:spawnDecoys()
+function Jefepassives_RstDecoy.getActiveWeapon()
+	if IsPassiveSkill("Jefepassives_RstDecoy_AB") then
+		return Jefepassives_RstDecoy_AB
+	elseif IsPassiveSkill("Jefepassives_RstDecoy_A") then
+		return Jefepassives_RstDecoy_A
+	elseif IsPassiveSkill("Jefepassives_RstDecoy_B") then
+		return Jefepassives_RstDecoy_B
+	elseif IsPassiveSkill("Jefepassives_RstDecoy") then
+		return Jefepassives_RstDecoy
 	end
+	return nil
 end
 
 passiveEffect:addPassiveEffect(
 	"Jefepassives_RstDecoy",
-	{"onNextTurn"}
+	{}
 )
 
 function Jefepassives_RstDecoy:isDecoyPawn(pawn)
@@ -273,6 +338,28 @@ function Jefepassives_RstDecoy:installPlanEnvironmentWrapper()
 	end
 end
 
+function Jefepassives_RstDecoy:installIsEnvironmentEffectWrapper()
+	if Mission[self.IsEnvEffectOriginalKey] then
+		return
+	end
+	Mission[self.IsEnvEffectOriginalKey] = Mission.IsEnvironmentEffect
+	local oldIsEnvironmentEffect = Mission[self.IsEnvEffectOriginalKey]
+	local spawnedKey = self.SpawnedKey
+
+	function Mission:IsEnvironmentEffect(...)
+		-- Called just before the board shifts into the enemy turn.
+		if not self[spawnedKey] then
+			local weapon = Jefepassives_RstDecoy.getActiveWeapon()
+			if weapon and Board then
+				self[spawnedKey] = true
+				weapon:spawnDecoys()
+			end
+		end
+		return oldIsEnvironmentEffect(self, ...)
+	end
+end
+
 modApi.events.onModsLoaded:subscribe(function()
 	Jefepassives_RstDecoy:installPlanEnvironmentWrapper()
+	Jefepassives_RstDecoy:installIsEnvironmentEffectWrapper()
 end)

@@ -1,5 +1,9 @@
 local boardUtils = mod_loader.mods[modApi.currentMod].libs.boardUtils
 
+-- Spawn timing (seconds). First decoy waits, then each extra decoy is staggered.
+local DELAY_BEFORE_FIRST_DECOY = 1.5
+local DELAY_BETWEEN_DECOYS = 0.5
+
 local a = ANIMS
 
 -- The loading paths and image loading approach are super finicky for pawns apparantly
@@ -69,7 +73,7 @@ AddPawn("Jefepassives_RstDecoy_Pawn_Reinforced")
 
 Jefepassives_RstDecoy = PassiveSkill:new{
 	Name = "RST Decoy",
-	Description = "At mission start setups a decoy on a random tile.",
+	Description = "After deployment, drops a decoy onto a random empty tile.",
 	Icon = "weapons/passives/passive_rst_decoy.png",
 	Rarity = 1,
 	PowerCost = 1,
@@ -89,6 +93,8 @@ Jefepassives_RstDecoy = PassiveSkill:new{
 		Jefepassives_RstDecoy_Pawn_Reinforced = true,
 	},
 	PlanEnvOriginalKey = "_jefepassivesRstDecoyPlanEnvOriginal",
+	IsEnvEffectOriginalKey = "_jefepassivesRstDecoyIsEnvEffectOriginal",
+	SpawnedKey = "_jefepassivesRstDecoySpawned",
 	Debug = false,
 }
 
@@ -109,7 +115,7 @@ Jefepassives_RstDecoy_A = Jefepassives_RstDecoy:new{
 
 Weapon_Texts.Jefepassives_RstDecoy_Upgrade2 = "Mass Produce"
 Jefepassives_RstDecoy_B = Jefepassives_RstDecoy:new{
-	UpgradeDescription = "Places an additional decoy.",
+	UpgradeDescription = "Drops an additional decoy.",
 	DecoyCount = 2,
 }
 
@@ -135,10 +141,74 @@ function Jefepassives_RstDecoy:getDecoyPawnType()
 	return "Jefepassives_RstDecoy_Pawn"
 end
 
-function Jefepassives_RstDecoy:GetPassiveSkillEffect_MissionStartHook(mission)
+function Jefepassives_RstDecoy:getPylonHashes()
+	local hashes = {}
+	if not Board then
+		return hashes
+	end
+	-- Pylons have not dropped yet in volcano phase 1, so those tiles
+	-- still look empty/safe. Exclude the zone itself.
+	for _, point in ipairs(extract_table(Board:GetZone("pylons"))) do
+		hashes[boardUtils.getSpaceHash(point)] = true
+	end
+	return hashes
+end
+
+-- Final-island phase 2 starts with mechs off-board. Hardcode the usual
+-- deploy cluster so decoys cannot land on those tiles.
+Jefepassives_RstDecoy.UNKNOWN_MECH_EXCLUSIONS = {
+	Point(2, 3),
+	Point(2, 4),
+	Point(3, 3),
+	Point(3, 4),
+}
+
+function Jefepassives_RstDecoy:areMechPositionsUnknown()
+	if not Board then
+		return true
+	end
+	for pawnId = 0, 2 do
+		local pawn = Board:GetPawn(pawnId)
+		if pawn and Board:IsValid(pawn:GetSpace()) then
+			return false
+		end
+	end
+	return true
+end
+
+function Jefepassives_RstDecoy:getUnknownMechExclusionHashes()
+	local hashes = {}
+	if not self:areMechPositionsUnknown() then
+		return hashes
+	end
+	for _, point in ipairs(self.UNKNOWN_MECH_EXCLUSIONS) do
+		hashes[boardUtils.getSpaceHash(point)] = true
+	end
+	return hashes
+end
+
+function Jefepassives_RstDecoy:getSpawnChoices()
+	local excluded = self:getPylonHashes()
+	for hash, _ in pairs(self:getUnknownMechExclusionHashes()) do
+		excluded[hash] = true
+	end
+	local candidates = {}
+	for _, point in ipairs(boardUtils.getSafeSpawnTiles(PATH_GROUND)) do
+		if not excluded[boardUtils.getSpaceHash(point)] then
+			table.insert(candidates, point)
+		end
+	end
+	return candidates
+end
+
+function Jefepassives_RstDecoy:spawnDecoys()
+	if not Board then
+		if self.Debug then LOG("Jefepassives RST Decoy: spawn skipped (no board)") end
+		return
+	end
+
 	local pawnType = self:getDecoyPawnType()
-	-- TODO: Decide on if I want it massive or not and what that means for the pathing
-	local choices = boardUtils.getSafeSpawnTiles(PATH_GROUND)
+	local choices = self:getSpawnChoices()
 	local spawnCount = math.min(self.DecoyCount, #choices)
 	if self.Debug then LOG(string.format("Jefepassives RST Decoy: Spawning %d pawns", spawnCount)) end
 
@@ -147,17 +217,43 @@ function Jefepassives_RstDecoy:GetPassiveSkillEffect_MissionStartHook(mission)
 				#choices, self.DecoyCount))
 	end
 
+	if spawnCount <= 0 then
+		return
+	end
+
+	-- Create the pawn first, then Fall(0) for a short drop-in (not AddDropper).
+	local debug = self.Debug
 	for i = 1, spawnCount do
 		local choice = random_removal(choices)
-		local decoy = PAWN_FACTORY:CreatePawn(pawnType)
-		Board:AddPawn(decoy, choice)
-		if self.Debug then LOG(string.format("Jefepassives RST Decoy: Spawned pawn at %s", choice:GetString())) end
+		local delayMs = (DELAY_BEFORE_FIRST_DECOY + (i - 1) * DELAY_BETWEEN_DECOYS) * 1000
+		modApi:scheduleHook(delayMs, function()
+				if not Board then
+					return
+				end
+				local decoy = PAWN_FACTORY:CreatePawn(pawnType)
+				Board:AddPawn(decoy, choice)
+				decoy:Fall(0)
+				if debug then LOG(string.format("Jefepassives RST Decoy: Dropping pawn at %s", choice:GetString())) end
+		end)
 	end
+end
+
+function Jefepassives_RstDecoy.getActiveWeapon()
+	if IsPassiveSkill("Jefepassives_RstDecoy_AB") then
+		return Jefepassives_RstDecoy_AB
+	elseif IsPassiveSkill("Jefepassives_RstDecoy_A") then
+		return Jefepassives_RstDecoy_A
+	elseif IsPassiveSkill("Jefepassives_RstDecoy_B") then
+		return Jefepassives_RstDecoy_B
+	elseif IsPassiveSkill("Jefepassives_RstDecoy") then
+		return Jefepassives_RstDecoy
+	end
+	return nil
 end
 
 passiveEffect:addPassiveEffect(
 	"Jefepassives_RstDecoy",
-	{"missionStartHook"}
+	{}
 )
 
 function Jefepassives_RstDecoy:isDecoyPawn(pawn)
@@ -247,6 +343,28 @@ function Jefepassives_RstDecoy:installPlanEnvironmentWrapper()
 	end
 end
 
+function Jefepassives_RstDecoy:installIsEnvironmentEffectWrapper()
+	if Mission[self.IsEnvEffectOriginalKey] then
+		return
+	end
+	Mission[self.IsEnvEffectOriginalKey] = Mission.IsEnvironmentEffect
+	local oldIsEnvironmentEffect = Mission[self.IsEnvEffectOriginalKey]
+	local spawnedKey = self.SpawnedKey
+
+	function Mission:IsEnvironmentEffect(...)
+		-- Called just before the board shifts into the enemy turn.
+		if not self[spawnedKey] then
+			local weapon = Jefepassives_RstDecoy.getActiveWeapon()
+			if weapon and Board then
+				self[spawnedKey] = true
+				weapon:spawnDecoys()
+			end
+		end
+		return oldIsEnvironmentEffect(self, ...)
+	end
+end
+
 modApi.events.onModsLoaded:subscribe(function()
 	Jefepassives_RstDecoy:installPlanEnvironmentWrapper()
+	Jefepassives_RstDecoy:installIsEnvironmentEffectWrapper()
 end)

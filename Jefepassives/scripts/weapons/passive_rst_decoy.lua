@@ -1,5 +1,9 @@
 local boardUtils = mod_loader.mods[modApi.currentMod].libs.boardUtils
 
+-- Spawn timing (seconds). First decoy waits, then each extra decoy is staggered.
+local DELAY_BEFORE_FIRST_DECOY = 1.5
+local DELAY_BETWEEN_DECOYS = 0.5
+
 local a = ANIMS
 
 -- The loading paths and image loading approach are super finicky for pawns apparantly
@@ -217,20 +221,21 @@ function Jefepassives_RstDecoy:spawnDecoys()
 		return
 	end
 
-	-- Same dropper used for final-island pylons: fall from above, then apply SpaceDamage.
-	local effect = SkillEffect()
+	-- Create the pawn first, then Fall(0) for a short drop-in (not AddDropper).
+	local debug = self.Debug
 	for i = 1, spawnCount do
 		local choice = random_removal(choices)
-		local drop = SpaceDamage(choice, 0)
-		drop.sPawn = pawnType
-		drop.bHide = true
-		effect:AddDropper(drop, "units/passive/fake_building_standing.png")
-		if self.Debug then LOG(string.format("Jefepassives RST Decoy: Dropping pawn at %s", choice:GetString())) end
-		if i < spawnCount then
-			effect:AddDelay(0.5)
-		end
+		local delayMs = (DELAY_BEFORE_FIRST_DECOY + (i - 1) * DELAY_BETWEEN_DECOYS) * 1000
+		modApi:scheduleHook(delayMs, function()
+				if not Board then
+					return
+				end
+				local decoy = PAWN_FACTORY:CreatePawn(pawnType)
+				Board:AddPawn(decoy, choice)
+				decoy:Fall(0)
+				if debug then LOG(string.format("Jefepassives RST Decoy: Dropping pawn at %s", choice:GetString())) end
+		end)
 	end
-	Board:AddEffect(effect)
 end
 
 function Jefepassives_RstDecoy.getActiveWeapon()

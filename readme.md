@@ -47,3 +47,17 @@ Optional Chronobeacons behavior with Memhack v1.3+
 | Taunting Field | Truelch | `Jefepassives_TauntingField` |
 | Water-Former | Truelch | `Jefepassives_Waterfall` |
 
+# Releases 
+
+## 1.1
+
+* Critical fixes for RST Decoys for the final mission potentially causing massive grid damage
+* Minor fixes for flying enemies and migratory evoker allowing them to go onto water/hole tiles
+
+Released: 9/2/2026
+
+## 1.0
+
+Initial release!
+
+Released: 7/26/2026

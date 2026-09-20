@@ -2,7 +2,7 @@ local mod = {
 	id = "JefePassives",
 	name = "JefePassives",
 	icon = "img/mod_icon.png",
-	version = "1.0.0",
+	version = "1.0.1",
 	modApiVersion = "2.9.5",
 	gameVersion = "1.2.93",
 	description = "A community pack of passive weapons made for our community YouTuber Jefepato",
@@ -100,7 +100,7 @@ function mod:init(options)
 	modApi:addWeaponDrop("Jefepassives_RandomSwap")
 	modApi:addWeaponDrop("Jefepassives_Rebound")
 	modApi:addWeaponDrop("Jefepassives_RstDecoy")
-	--modApi:addWeaponDrop("Jefepassives_SpikyCleats")
+	modApi:addWeaponDrop("Jefepassives_SpikyCleats")
 	modApi:addWeaponDrop("Jefepassives_TauntingField")
 	modApi:addWeaponDrop("Jefepassives_Waterfall")
 

@@ -54,6 +54,8 @@ Optional Chronobeacons behavior with Memhack v1.3+
 
 * Finally implemented the weeks-old fix for the Concussors, making them finally available
 
+Released: 9/20/2026
+
 ## 1.1
 
 * Critical fixes for RST Decoys for the final mission potentially causing massive grid damage

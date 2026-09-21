@@ -29,7 +29,7 @@ function Jefepassives_SpikyCleats:GetSkillEffect(p1,p2)
 	return ret
 end
 Jefepassives_SpikyCleats_A = Jefepassives_SpikyCleats:new{
-	UpgradeDescription = "Deals one additional damage each time.",
+	UpgradeDescription = "Deals one additional damage each time a spawn is blocked.",
 	Passive = "Jefepassives_SpikyCleats_A",
 	Pawn = "Beetle1",
 }
@@ -42,7 +42,20 @@ local function EVENT_VekSpawnRemoved(mission, spawnData)
 	end
 		local point = spawnData.location
 		if Board:IsPawnSpace(point) and (Board:GetPawn(point):GetId() == spawnData.id) then
-			(Board:GetPawn(point)):SetHealth((_G[Board:GetPawn(point):GetType()].Health) - (spawnData.turns - 1)*dmg)
+			local pawn = Board:GetPawn(point)
+			local damage = (spawnData.turns - 1)*dmg
+           		pawnType = _G[pawn:GetType()]
+			LOG("test")
+            		if pawnType.SoundLocation then
+                		if pawn:GetHealth() <= damage then
+                    			Board:AddEffect(SoundEffect(point,pawnType.SoundLocation.."death"))
+                		else
+					if damage > 0 then
+                    				Board:AddEffect(SoundEffect(point,pawnType.SoundLocation.."hurt"))
+					end
+               			end
+            		end
+            		pawn:ModifyHealth((spawnData.turns - 1)*dmg*-1,true,0)
 		end
 	end
 end
@@ -128,20 +141,13 @@ local function EVENT_MissionUpdate(mission)
 		end
 		--crack blocked spawn
 			if IsPassiveSkill("Jefepassives_SpikyCleats") then
-	local dmg = 1
-	if IsPassiveSkill("Jefepassives_SpikyCleats_A") then
-		dmg = 2
-	end
-				local point = mission.BlockedSpawnList[mission.DestabilizeCounter]
-				local data = mission:GetSpawnPointData(point)
-				local type = data.type
-
-				if (_G[type].Health) <= ((data.turns)*dmg) then
-
-
-					mission:RemoveSpawnPoint(point)
-
+				local dmg = 1
+				if IsPassiveSkill("Jefepassives_SpikyCleats_A") then
+					dmg = 2
 				end
+				local point = mission.BlockedSpawnList[mission.DestabilizeCounter]
+				Board:AddAlert(point, "CONCUSSED")
+
 				Game:TriggerSound("/weapons/crack_ko")
 			end
 	end

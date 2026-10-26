@@ -15,6 +15,7 @@ Enjoy!
 * Das Keifer (Redacted Rice)
 * Truelch
 * Tatu
+* Hedera
 
 ## Install
 

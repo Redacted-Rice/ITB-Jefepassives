@@ -2,7 +2,7 @@ local mod = {
 	id = "JefePassives",
 	name = "JefePassives",
 	icon = "img/mod_icon.png",
-	version = "1.2.0",
+	version = "1.3.0",
 	modApiVersion = "2.9.5",
 	gameVersion = "1.2.93",
 	description = "A community pack of passive weapons made for our community YouTuber Jefepato",
@@ -74,33 +74,47 @@ function mod:init(options)
 	require(self.scriptPath .. "images")
 
 	require(self.scriptPath .. "weapons/passive_acid_rain")
+	require(self.scriptPath .. "weapons/passive_acidifier")
 	require(self.scriptPath .. "weapons/passive_aligned_radar")
 	require(self.scriptPath .. "weapons/passive_cancel_nearby_attack")
+	--require(self.scriptPath .. "weapons/passive_combo_mines")
 	require(self.scriptPath .. "weapons/passive_deploy_items")
-	require(self.scriptPath .. "weapons/passive_lonely_awkward")	
+	require(self.scriptPath .. "weapons/passive_friction_amp")
+	require(self.scriptPath .. "weapons/passive_lonely_awkward")
+	require(self.scriptPath .. "weapons/passive_love")		
 	--require(self.scriptPath .. "weapons/passive_mark_random")
 	require(self.scriptPath .. "weapons/passive_materia")
 	require(self.scriptPath .. "weapons/passive_migration_instincts")
 	require(self.scriptPath .. "weapons/passive_random_swap")
+	require(self.scriptPath .. "weapons/passive_rogue_terrain")
 	require(self.scriptPath .. "weapons/passive_rebound")
 	require(self.scriptPath .. "weapons/passive_rst_decoy")
+	require(self.scriptPath .. "weapons/passive_shrapnel")
+	require(self.scriptPath .. "weapons/passive_spare_plating")
 	require(self.scriptPath .. "weapons/passive_spikycleats")
 	require(self.scriptPath .. "weapons/passive_taunting_field")
 	require(self.scriptPath .. "weapons/passive_waterfall")
 
 	modApi:addWeaponDrop("Jefepassives_AcidRain")
+	modApi:addWeaponDrop("Jefepassives_Acidifier")
 	modApi:addWeaponDrop("Jefepassives_AlignedRadar")
 	modApi:addWeaponDrop("Jefepassives_Awkwardness")
 	modApi:addWeaponDrop("Jefepassives_CancelNearbyAttacks")
+	--modApi:addWeaponDrop("Jefepassives_ComboMines")
 	modApi:addWeaponDrop("Jefepassives_DeployItems")
+	modApi:addWeaponDrop("Jefepassives_Friction")
 	modApi:addWeaponDrop("Jefepassives_Loneliness")	
+	--modApi:addWeaponDrop("Jefepassives_Love") -- enable at your own risk	
 	--modApi:addWeaponDrop("Jefepassives_MarkRandom")
 	modApi:addWeaponDrop("Jefepassives_Materia")
 	modApi:addWeaponDrop("Jefepassives_MigratoryEvoker")
 	modApi:addWeaponDrop("Jefepassives_RandomSwap")
+	modApi:addWeaponDrop("Jefepassives_RogueTerrain")
 	modApi:addWeaponDrop("Jefepassives_Rebound")
 	modApi:addWeaponDrop("Jefepassives_RstDecoy")
-	modApi:addWeaponDrop("Jefepassives_SpikyCleats")
+	modApi:addWeaponDrop("Jefepassives_Shrapnel")
+	modApi:addWeaponDrop("Jefepassives_SparePlating")
+	--modApi:addWeaponDrop("Jefepassives_SpikyCleats")
 	modApi:addWeaponDrop("Jefepassives_TauntingField")
 	modApi:addWeaponDrop("Jefepassives_Waterfall")
 

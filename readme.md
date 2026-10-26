@@ -34,22 +34,32 @@ Optional Chronobeacons behavior with Memhack v1.3+
 | Name | Author | Weapon ID |
 |------|--------|-----------|
 | A.C.I.D. Rain | Truelch | `Jefepassives_AcidRain` |
+|Acidifier| Hedera | `Jefepassives_Acidifier` |
 | Awkwardness Inducer | Tatu | `Jefepassives_Awkwardness` |
-| Chrono Beacons | Das Keifer | `Jefepassives_ChronoBeacons` |
-| Concussors | TheBoardsCousin | `Jefepassives_SpikyCleats` |
+| Chrono Beacons | Das Keifer | `Jefepassives_RstDecoy` |
 | Data-Link | Truelch | `Jefepassives_AlignedRadar` |
 | Experimental Swapper | Truelch | `Jefepassives_RandomSwap` |
+| Friction Amp | Hedera | `Jefepassives_Friction` |
 | Intimidating Presence | Truelch | `Jefepassives_CancelNearbyAttacks` |
 | Loneliness Amplifier | Tatu | `Jefepassives_Loneliness` |
 | Materia Nanobots | TheBoardsCousin | `Jefepassives_Materia` |
+| Mega Shrapnel | Hedera | `Jefepassives_Shrapnel` |
 | Migratory Evoker | Das Keifer | `Jefepassives_MigratoryEvoker` |
 | Mines Dispenser | Truelch | `Jefepassives_DeployItems` |
 | Rebound Satellite | TheBoardsCousin | `Jefepassives_Rebound` |
+| Rogue Terraformer | Hedera | `Jefepassives_RogueTerrain` |
 | RST Decoy | Das Keifer | `Jefepassives_RstDecoy` |
+| Spare Plating | Hedera | `Jefepassives_SparePlating` |
 | Taunting Field | Truelch | `Jefepassives_TauntingField` |
+| The Power of Love | Hedera | `Jefepassives_Love` |
 | Water-Former | Truelch | `Jefepassives_Waterfall` |
 
 # Releases 
+
+## 1.3
+* Added 6 new passives by Hedera
+
+Released: 10/26/2026
 
 ## 1.2
 

@@ -114,7 +114,7 @@ function mod:init(options)
 	modApi:addWeaponDrop("Jefepassives_RstDecoy")
 	modApi:addWeaponDrop("Jefepassives_Shrapnel")
 	modApi:addWeaponDrop("Jefepassives_SparePlating")
-	--modApi:addWeaponDrop("Jefepassives_SpikyCleats")
+	modApi:addWeaponDrop("Jefepassives_SpikyCleats")
 	modApi:addWeaponDrop("Jefepassives_TauntingField")
 	modApi:addWeaponDrop("Jefepassives_Waterfall")
 
